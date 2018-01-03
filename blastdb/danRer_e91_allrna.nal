@@ -1,0 +1,7 @@
+#
+# Alias file created 12/17/2017 23:32:25
+#
+TITLE danRer_e91_allrna
+DBLIST "./Danio_rerio.GRCz10.cdna.all.fa" "./Danio_rerio.GRCz10.ncrna.fa" 
+NSEQ 62878
+LENGTH 118469934
