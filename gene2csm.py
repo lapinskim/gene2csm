@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
 from multiprocessing import Pool
-from collections import defaultdict, Counter
+from collections import Counter
 from decimal import Decimal
 from pybedtools import BedTool
 
@@ -569,48 +569,6 @@ def processing_fun(input_list):
     # blast the sequence against the Danio rerio RNA database
     bs, ni = blast_it(c_seq, ngsi_tmp)
     return coords, c_seq, gc_content, c_mean_ent, dG_AA, G_A, bs, ni
-
-
-def estimate_energy_all(database,
-                        fasta_index,
-                        gene,
-                        intervals,
-                        coverage,
-                        length,
-                        GC_lims,
-                        proc=1):
-    '''
-    Estimate free energy change for each segment for all transcripts-
-    very inefficient for 3 isoforms and ~500 segments takes ~10-12h
-    on 4 procesors/ 7 threads.
-    '''
-
-    pool = Pool(proc)
-    strand = gene.strand
-    segments = get_seq(fasta_index, intervals, coverage, length)
-    result_dict = defaultdict(list)
-    for transcript_id, transcript_seq in get_trans(database,
-                                                   fasta_index,
-                                                   gene):
-        iterator = feed_fun(segments,
-                            length,
-                            strand,
-                            GC_lims,
-                            transcript_seq)
-
-        for result in pool.imap_unordered(processing_fun, iterator,
-                                          chunksize=1):
-            coords, c_seq, gc_content, dG, dG_AA = result
-            if coords not in result_dict[coords[1]]:
-                result_dict[coords[1]].append(coords)
-            if c_seq not in result_dict[coords[1]]:
-                result_dict[coords[1]].append(c_seq)
-            if gc_content not in result_dict[coords[1]]:
-                result_dict[coords[1]].append(gc_content)
-            if ('AA', dG_AA) not in result_dict[coords[1]]:
-                result_dict[coords[1]].append(('AA', dG_AA))
-            result_dict[coords[1]].append((transcript_id, dG))
-    return result_dict
 
 
 def estimate_energy(database,
