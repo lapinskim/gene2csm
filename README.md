@@ -1,6 +1,35 @@
 gene2csm.py
 ==================
 
+## Example usage
+
+See the included Jupyter [notebook](./gene2csm.ipynb).
+
+## Dependencies
+
+* `python3`
+* `jupyter` (for notebook integration)
+* `numpy`
+* `matplotlib`
+* `pandas`
+* `biopython`
+* `gffutils`
+* `pybedtools`
+* `pysam`
+* `openpyxl` (for XLSX file generation)
+* NCBI BLAST 2.7.1
+* ViennaRNA Package 2.4.3
+
+## Requirements
+
+Ensembl GTF annotaion file, soft masked genomic sequence FASTA file and GVF
+variation file are required, unless working only on user input (without any
+database sequence lookup). 
+
+
+Ensembl cDNA FASTA file and ncRNA FASTA file are required for BLAST database
+searches.
+
 ## Description
 
 `gene2csm.py` is a tool for efficient design of crRNA guide sequences for RNA mediated RNA processing enzymes. It is designed to satisfy the following features of the oligonucleotide:
