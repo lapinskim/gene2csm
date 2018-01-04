@@ -20,8 +20,6 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * NCBI BLAST 2.7.1
 * ViennaRNA Package 2.4.3
 
----
-
 ## Requirements
 
 Ensembl GTF annotaion file, soft masked genomic sequence FASTA file and GVF
@@ -98,6 +96,7 @@ The output table is sorted by the `score` column and contains 50 best scoring cR
 non-inclusive
 * `score` column contains the cumulative rank score calculated from the entropy value and the bitscore value of the sequence only; no other characteristic is taken into consideration; the lower the better 
 
+---
 
 References:
 1. <a name="r1"></a>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Schäffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), _"Gapped BLAST and PSI-BLAST: a new generation of protein database search programs"_, Nucleic Acids Res. 25:3389-3402.
