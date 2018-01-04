@@ -21,6 +21,17 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * NCBI BLAST 2.7.1
 * ViennaRNA Package 2.4.3
 
+## Installation
+
+#### Quick instalation with `pipenv`
+To satisfy `python` dependencies install `pipenv` using `pip` or your prefered
+package manager. Then run `pipenv install` from the program directory. This will
+install all the required modules with their dependencies, as specified in th
+proided `Pipfile` and `Pipfile.lock` into the new virtual environment.
+
+#### Quick installation with `conda`
+For non-pythonic dependencies run `conda install -c bedtools blast viennarna`.
+
 ## Requirements
 
 Ensembl GTF annotaion file, soft masked genomic sequence FASTA file and GVF
