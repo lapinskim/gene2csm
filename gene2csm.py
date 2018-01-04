@@ -495,6 +495,8 @@ def blast_it(sequence, tmp_file=None):
     *Might* be faster to run on all sequences beforehand.
     '''
 
+    # TODO: take out the blastdb parameter
+
     assert isinstance(sequence, str)
 
     params = ['-task', 'blastn',
