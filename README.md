@@ -20,6 +20,8 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * NCBI BLAST 2.7.1
 * ViennaRNA Package 2.4.3
 
+---
+
 ## Requirements
 
 Ensembl GTF annotaion file, soft masked genomic sequence FASTA file and GVF
