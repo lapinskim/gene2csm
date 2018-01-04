@@ -4,6 +4,8 @@
 
 # Database, index and sequence files
 blastdb/
+!blastdb/README.md
+!blastdb/*.nal
 *.db
 *.fa
 *.gtf
