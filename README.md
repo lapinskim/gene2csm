@@ -7,7 +7,7 @@ gene2csm.py
 
 1. Specificity (within target organism)
 
-   Every sequence is the subject of BLAST [1](#r1) database search of coding and non-coding RNA sequences within the target organism to exclude off-traget effects of highly homologous sequences.
+   Every sequence is the subject of BLAST \[[1](#r1)\] database search of coding and non-coding RNA sequences within the target organism to exclude off-traget effects of highly homologous sequences.
 
 1. Isoform prevalence
 
@@ -38,7 +38,7 @@ Other features taken into consideration:
 
 1. No target mRNA secondary structures within the binding region
 
-   Target sequence should avoid highly structured regions of the transcript to assure the highest accessibility to the RNA strand. The RNA secondary structure modeling is performed with the ViennaRNA package [2](#r2).
+   Target sequence should avoid highly structured regions of the transcript to assure the highest accessibility to the RNA strand. The RNA secondary structure modeling is performed with the ViennaRNA package \[[2](#r2)\].
 
 1. No self-complementarity
 
@@ -69,5 +69,5 @@ non-inclusive
 
 
 References:
-<a name="r1"></a>1. Stephen F. Altschul, Thomas L. Madden, Alejandro A. Schäffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), "Gapped BLAST and PSI-BLAST: a new generation of protein database search programs", Nucleic Acids Res. 25:3389-3402.
-<a name="r2"></a>1. Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.; ViennaRNA Package 2.0; Algorithms for Molecular Biology, 6:1 26, 2011, doi:10.1186/1748-7188-6-26
+1. <a name="r1"></a>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Schäffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), "Gapped BLAST and PSI-BLAST: a new generation of protein database search programs", Nucleic Acids Res. 25:3389-3402.
+2. <a name="r2"></a>Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.; ViennaRNA Package 2.0; Algorithms for Molecular Biology, 6:1 26, 2011, doi:10.1186/1748-7188-6-26
