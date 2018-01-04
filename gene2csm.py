@@ -683,6 +683,7 @@ def estimate_energy_input(input_sequence,
     Estimate free energy change for a single transcript.
 
     Parameters:
+    -----------
 
     strand- use if input is genomic sequence
     database; fasta_index - must be provided if database Transcript ID
