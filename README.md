@@ -69,5 +69,5 @@ non-inclusive
 
 
 References:
-1. <a name="r1"></a>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Schäffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), "Gapped BLAST and PSI-BLAST: a new generation of protein database search programs", Nucleic Acids Res. 25:3389-3402.
-2. <a name="r2"></a>Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.; ViennaRNA Package 2.0; Algorithms for Molecular Biology, 6:1 26, 2011, doi:10.1186/1748-7188-6-26
+1. <a name="r1"></a>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Schäffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), _"Gapped BLAST and PSI-BLAST: a new generation of protein database search programs"_, Nucleic Acids Res. 25:3389-3402.
+2. <a name="r2"></a>Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.; _ViennaRNA Package 2.0_; Algorithms for Molecular Biology, 6:1 26, 2011, doi:10.1186/1748-7188-6-26
