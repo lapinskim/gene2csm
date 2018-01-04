@@ -15,6 +15,7 @@ pandas = "*"
 pybedtools = "*"
 pysam = "*"
 openpyxl = "*"
+numpy = "*"
 
 
 [dev-packages]
