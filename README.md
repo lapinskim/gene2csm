@@ -50,19 +50,19 @@ searches.
 
    Every sequence is the subject of BLAST \[[1](#r1)\] database search of coding and non-coding RNA sequences within the target organism to exclude off-traget effects of highly homologous sequences.
 
-1. Isoform prevalence
+2. Isoform prevalence
 
    Considered sequence should span the region covered by maximal number of annotated isoforms for a complete target knock-down.
 
-1. Absence of alternative, annotated start codons downstream of the cut site
+3. Absence of alternative, annotated start codons downstream of the cut site
 
    Considered sequence should not have any annotated start codons downstream of the target site on the protein coding isoforms.
 
-1. Avoid exon-exon boundaries
+4. Avoid exon-exon boundaries
 
    Sequence should not contain any annotated splice sites.
 
-1. Not spanning know SNP sites
+5. Not spanning know SNP sites
 
    Sequence should not contain any variable nucleotides contained in the dbSNP database and Ensembl resources.
 
@@ -73,19 +73,19 @@ Other features taken into consideration:
 
    Sequence should not contain any interspersed repeats and low complexity sequences, masked by RepeatMasker
 
-1. Balanced GC content
+2. Balanced GC content
 
    Sequences should have GC content within the given limits.
 
-1. No target mRNA secondary structures within the binding region
+3. No target mRNA secondary structures within the binding region
 
    Target sequence should avoid highly structured regions of the transcript to assure the highest accessibility to the RNA strand. The RNA secondary structure modeling is performed with the ViennaRNA package \[[2](#r2)\].
 
-1. No self-complementarity
+4. No self-complementarity
 
    Considered sequence should not form stable homodimeric duplexes.
 
-1. No crRNA secondary structures
+5. No crRNA secondary structures
 
    The sequence should not contain any local secondary structures.
 
