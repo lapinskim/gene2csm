@@ -17,6 +17,7 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * `pybedtools`
 * `pysam`
 * `openpyxl` (for XLSX file generation)
+* bedtools v2.26.0
 * NCBI BLAST 2.7.1
 * ViennaRNA Package 2.4.3
 
