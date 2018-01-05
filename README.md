@@ -36,7 +36,7 @@ and `Pipfile.lock` into the new virtual environment.
 #### Quick installation with [`conda`](https://conda.io/docs/ "conda")
 For non-pythonic dependencies run
 ```
-conda install -c bedtools blast viennarna
+conda install -c bioconda bedtools blast viennarna
 ```
 
 ## Requirements
