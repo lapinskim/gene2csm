@@ -49,6 +49,8 @@ database sequence lookup).
 Ensembl cDNA FASTA file and ncRNA FASTA file are required for BLAST database
 searches.
 
+Download the required files from [Ensembl FTP site](https://www.ensembl.org/info/data/ftp/index.html).
+
 ## Description
 
 `gene2csm.py` is a tool for efficient design of crRNA guide sequences for RNA mediated RNA processing enzymes. It is designed to satisfy the following features of the oligonucleotide:
