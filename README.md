@@ -14,17 +14,16 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * `pandas`
 * `biopython`
 * [`gffutils`](http://daler.github.io/gffutils/ "gffutils")
-* `pybedtools` [:link:](https://daler.github.io/pybedtools/ "pybedtools")
+* [`pybedtools`](https://daler.github.io/pybedtools/ "pybedtools")
 * `pysam`
 * `openpyxl` (for XLSX file generation)
-* bedtools v2.26.0 [:link:](http://bedtools.readthedocs.io/en/latest/ "bedtools")
-* NCBI BLAST 2.7.1 [:link:](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download "BLAST")
-* ViennaRNA Package 2.4.3 [:link:](https://www.tbi.univie.ac.at/RNA/
-  "ViennaRNA")
+* [bedtools v2.26.0](http://bedtools.readthedocs.io/en/latest/ "bedtools")
+* [NCBI BLAST 2.7.1](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download "BLAST")
+* [ViennaRNA Package 2.4.3](https://www.tbi.univie.ac.at/RNA/ "ViennaRNA")
 
 ## Installation
 
-#### Quick instalation with `pipenv` [:link:](http://pipenv.readthedocs.io/en/latest/ "pipenv")
+#### Quick instalation with [`pipenv`](http://pipenv.readthedocs.io/en/latest/ "pipenv")
 To satisfy `python` dependencies install `pipenv` using `pip` or your prefered
 package manager. Then run
 ```
@@ -34,7 +33,7 @@ from the program directory. This will install all the required modules with
 their dependencies, as specified in the provided `Pipfile` 
 and `Pipfile.lock` into the new virtual environment.
 
-#### Quick installation with `conda` [:link:](https://conda.io/docs/ "conda")
+#### Quick installation with [`conda`](https://conda.io/docs/ "conda")
 For non-pythonic dependencies run
 ```
 conda install -c bedtools blast viennarna
