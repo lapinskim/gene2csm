@@ -13,7 +13,7 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * `matplotlib`
 * `pandas`
 * `biopython`
-* `gffutils` [:link:](http://daler.github.io/gffutils/ "gffutils")
+* [`gffutils`](http://daler.github.io/gffutils/ "gffutils")
 * `pybedtools` [:link:](https://daler.github.io/pybedtools/ "pybedtools")
 * `pysam`
 * `openpyxl` (for XLSX file generation)
