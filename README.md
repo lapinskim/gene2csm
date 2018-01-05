@@ -12,7 +12,7 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 * `numpy`
 * `matplotlib`
 * `pandas`
-* `biopython`
+* [`biopython`](http://biopython.org/ "Biopython")
 * [`gffutils`](http://daler.github.io/gffutils/ "gffutils")
 * [`pybedtools`](https://daler.github.io/pybedtools/ "pybedtools")
 * `pysam`
