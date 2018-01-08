@@ -781,7 +781,8 @@ def gene2csm(database,
              GC_limit,
              n_threads,
              coverage_limit='max',
-             e_list=None):
+             e_list=None,
+             file_prefix=None):
     '''
     Main function to run the program.
     '''
@@ -821,7 +822,10 @@ unspecified strand symbol: {}.'.format(gene.strand)
             print('No valid segments for target {}:{}'.foramt(target, g_name))
             continue
 
-        fn = target + '.result.csv'
+        if file_prefix:
+            fn = file_prefix + '.result.csv'
+        else:
+            fn = target + '.result.csv'
         print('\nWriting file {}.'.format(fn))
         with open(fn, 'w') as handle:
             for item in output:
