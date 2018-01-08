@@ -589,6 +589,9 @@ def estimate_energy(database,
     pool = Pool(proc)
     strand = gene.strand
     segments = get_seq(fasta_index, intervals, coverage, length)
+    # do not run if there are no segments to process
+    if len(segments) == 0:
+        return -1
     total = count_seq(segments, length, GC_lims)
     ngsi_tmp = create_negseqidlst(database, gene_id=gene.id)
     result_list = []
@@ -634,6 +637,7 @@ def processing_input(string):
 
     # quick checks
     assert isinstance(string, str), 'Input not a srting.'
+    assert len(string) != 0, 'Input empty.'
     # take care of whitespaces
     sequence = string.strip()
     assert sequence.upper().startswith(('>', 'A', 'G', 'C', 'T')),\
@@ -780,6 +784,10 @@ def gene2csm(database,
                                  crRNA_lenght,
                                  GC_limit,
                                  proc=n_threads)
+        # do not store the empty results
+        if output == -1:
+            print('No valid segments for target {}:{}'.foramt(target, g_name))
+            continue
 
         fn = target + '.result.csv'
         print('\nWritting file {}.'.format(fn))
