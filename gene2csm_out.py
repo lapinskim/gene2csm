@@ -3,7 +3,7 @@ import pandas as pd
 from decimal import Decimal
 
 
-def prepare_output(result, n_store=50, write=True):
+def prepare_output(result, n_store=50, write=True, file_prefix=None):
     '''
     Prepare the data frames, score and store the output.
     '''
@@ -60,7 +60,10 @@ def prepare_output(result, n_store=50, write=True):
             final_dict[name] = df.head(n_store)
     if write:
         for key in final_dict:
-            xlsx_fn = key + '.csm.xlsx'
+            if file_prefix:
+                xlsx_fn = file_prefix + key + '.csm.xlsx'
+            else:
+                xlsx_fn = key + '.csm.xlsx'
             print('Writing file {}.'.format(xlsx_fn))
             final_dict[key].to_excel(xlsx_fn)
     return final_dict
