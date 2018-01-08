@@ -108,6 +108,25 @@ def get_int(gene, genomic_coverage):
     return gen_int
 
 
+def sub_user(intervals, strand, user_list=None):
+    '''
+    Subtract user submitted *CDS containing exons* from processing.
+    '''
+
+    i_list = intervals
+    if user_list is not None:
+        sorted_list = sorted(user_list, reverse=True)
+        if strand == "-":
+            for e in sorted_list:
+                del i_list[-e]
+        elif strand == "+":
+            for e in sorted_list:
+                del i_list[e - 1]
+        print('Omitting user submitted *CDS containing exons*: {}.'
+              .format(', '.join(e for e in user_list)))
+    return i_list
+
+
 def sub_var(intervals, variation_fn):
     '''
     Subtract variable sequences from the genomic intervals
@@ -117,8 +136,10 @@ def sub_var(intervals, variation_fn):
     '''
 
     # make some basic checks
-    assert os.path.exists(variation_fn)
-    assert variation_fn.endswith(('gvf', 'gvf.gz'))
+    assert intervals != [], 'No intervals to process.'
+    assert os.path.exists(variation_fn), 'GVF file does not exist.'
+    assert variation_fn.endswith(('gvf', 'gvf.gz')), 'Ensure the variation\
+containing file is in a GVF format. \'.gvf\' extension missing.'
 
     gvf_sorted_fn = 'sorted.gvf'.join(variation_fn.split('gvf'))
     # sort the variation database for faster processing and store
