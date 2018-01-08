@@ -30,7 +30,7 @@ def revcomp(seq):
 
 
 def gc(seq):
-    # return gc content percentage
+    # return GC content percentage
 
     assert isinstance(seq, str)
     seq = seq.upper()
@@ -59,7 +59,7 @@ def get_cov(database, gene):
 
     # get the length of the gene (1 based coords)
     gene_length = gene.end - gene.start + 1
-    print('{} loci lenght: {!s}.'.format(gene.id, gene_length))
+    print('{} loci length: {!s}.'.format(gene.id, gene_length))
     # create a numpy array of zeros with the length of the gene
     gene_cov = np.zeros(gene_length, dtype=int)
     for cds in database.children(gene, featuretype='CDS', order_by='start'):
@@ -73,7 +73,7 @@ def get_cov(database, gene):
 
 
 def get_int(gene, genomic_coverage):
-    # get the genomic intervals (for sequene retrieval)
+    # get the genomic intervals (for sequence retrieval)
 
     gen_int = []
     cov = 0
@@ -131,7 +131,7 @@ def sub_var(intervals, variation_fn):
     '''
     Subtract variable sequences from the genomic intervals
 
-    For future enhancemnt consider soft masking the whole genome
+    For future enhancement consider soft masking the whole genome
     beforehand or splitting the GVF file on chromosomes for speed improvements.
     '''
 
@@ -157,7 +157,7 @@ containing file is in a GVF format. \'.gvf\' extension missing.'
     # make sure the format is right
     for e in intervals:
         assert len(e) == 4
-    # perform genome aritmethics
+    # perform genome arithmetic's
     gi_gv = BedTool(('\t'
                      .join([c, str(s), str(e), '.', str(cov)]) for c, s, e, cov
                      in intervals)).saveas().subtract(gvf_bt,
@@ -194,7 +194,7 @@ def get_seq(fasta_index, intervals, coverage, length):
 
 def gen_seq(coord, sequence, length, strand, GC_lims, index=0):
     '''
-    Generate N long nucleotide streches of CDS,
+    Generate N long nucleotide stretches of CDS,
     not containing any RepeatMasker marked low complexity regions
     '''
 
@@ -306,7 +306,7 @@ def run_RNAfold(transcript_id, transcript_seq):
     '''
     Run RNAfold from ViennaRNA Package.
 
-    Discard its output, feed the Dot Plot file to the mouintain.pl
+    Discard its output, feed the Dot Plot file to the mountain.pl
     script to recover the positional entropy for each base of the
     input sequence.
     '''
@@ -356,7 +356,7 @@ def get_trans(database, fasta_index, gene):
     Obtain transcript sequences
 
     TODO: with biopython this is slow, as it accesses the fasta file
-    from the begining of each record for each exon of every transcript
+    from the beginning of each record for each exon of every transcript
     and needs a future rewrite
 
     For speed, use:
@@ -387,7 +387,7 @@ def pick_transcript(database, fasta_index, gene=None, eid=None):
     '''
     Pick only the longest from protein coding, preferably havana/ensembl+havana
     annotated transcripts and return it's id and sequence;
-    if ensembl id is provided by user return sequence of that particular one.
+    if Ensembl id is provided by user return sequence of that particular one.
     '''
 
     if not eid:
@@ -408,7 +408,7 @@ preferably HAVANA annotated transcript for free energy calculations.')
                 for exon in database.children(transcript,
                                               featuretype='exon',
                                               order_by='start'):
-                    # calculate the transcript lenght from it's exons' lenght,
+                    # calculate the transcript length from it's exons' length,
                     # store the exons' coords,
                     # do not extract the sequence yet
                     t_len += exon.end - exon.start + 1
@@ -430,7 +430,7 @@ preferably HAVANA annotated transcript for free energy calculations.')
                     max_exons = t_exo
                     max_source = t_sou
                 elif t_len == max_len and t_sou != max_source:
-                    # if by chance two transcripts are of equal lenght,
+                    # if by chance two transcripts are of equal length,
                     # pick the one with merged annotation;
                     # if both have the same annotation source,
                     # keep the first one
@@ -577,7 +577,7 @@ def processing_fun(input_list):
 
     coords, c_seq, gc_content, t_seq, ngsi_tmp, entropy = input_list
     # get the mean entropy of the target sequence
-    # TODO: !!! this is far from perfect
+    # TODO: !!! This is far from perfect
     # t_seq.upper() required in case of working with user-input
     # and targeting soft masked sequence
     c_start = t_seq.upper().find(revcomp(revtranscribe(c_seq)))
@@ -657,9 +657,9 @@ def processing_input(string):
     '''
 
     # quick checks
-    assert isinstance(string, str), 'Input not a srting.'
+    assert isinstance(string, str), 'Input not a string.'
     assert len(string) != 0, 'Input empty.'
-    # take care of whitespaces
+    # take care of white spaces
     sequence = string.strip()
     assert sequence.upper().startswith(('>', 'A', 'G', 'C', 'T')),\
         'Input not a DNA sequence in FASTA format or PLAIN.'
@@ -672,7 +672,7 @@ def processing_input(string):
         seq_id = 'plain'
         seq = sequence
 
-    # join all the lines if present, also taking care of whitespaces
+    # join all the lines if present, also taking care of white spaces
     seq = ''.join(l.strip() for l in seq.split('\n'))
 
     return seq_id, seq
@@ -816,7 +816,7 @@ unspecified strand symbol: {}.'.format(gene.strand)
             continue
 
         fn = target + '.result.csv'
-        print('\nWritting file {}.'.format(fn))
+        print('\Writing file {}.'.format(fn))
         with open(fn, 'w') as handle:
             for item in output:
                 handle.write(','.join([str(e) for e in item]) + '\n')
