@@ -108,7 +108,7 @@ def get_int(gene, genomic_coverage):
     return gen_int
 
 
-def sub_user(intervals, strand, user_list=None):
+def sub_usr(intervals, strand, user_list=None):
     '''
     Subtract user submitted *CDS containing exons* from processing.
     '''
@@ -806,8 +806,8 @@ unspecified strand symbol: {}.'.format(gene.strand)
         # plotting
         plt.plot(plot_cov, 'blue')
         plt.show()
-        gen_int = sub_var(sub_user(get_int(gene, gene_cov), gene.strand,
-                                   e_list), var_db)
+        gen_int = sub_var(sub_usr(get_int(gene, gene_cov), gene.strand,
+                                  e_list), var_db)
         output = estimate_energy(database,
                                  fasta_index,
                                  gene,
