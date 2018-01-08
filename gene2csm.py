@@ -123,7 +123,7 @@ def sub_user(intervals, strand, user_list=None):
             for e in sorted_list:
                 del i_list[e - 1]
         print('Omitting user submitted *CDS containing exons*: {}.'
-              .format(', '.join(e for e in user_list)))
+              .format(', '.join(str(e) for e in user_list)))
     return i_list
 
 
