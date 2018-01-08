@@ -783,6 +783,9 @@ def gene2csm(database,
     for target in target_lst:
         print('\n---\n')
         gene = database[target]
+        # important assertion- has a specified strand
+        assert gene.strand == '+' or gene.strand == '-', 'Target gene has\
+unspecified strand symbol.'
         g_name = gene['gene_name'][0]
         print(g_name)
         gene_cov = get_cov(database, gene)
