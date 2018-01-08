@@ -774,8 +774,7 @@ def gene2csm(database,
              crRNA_lenght,
              GC_limit,
              n_threads,
-             coverage_limit='max',
-             e_list=None):
+             coverage_limit='max'):
     '''
     Main function to run the program.
     '''
@@ -786,7 +785,7 @@ def gene2csm(database,
         gene = database[target]
         # important assertion- has a specified strand
         assert gene.strand == '+' or gene.strand == '-', 'Target gene has\
-unspecified strand symbol: {}.'.format(gene.strand)
+unspecified strand symbol.'
         g_name = gene['gene_name'][0]
         print(g_name)
         gene_cov = get_cov(database, gene)
@@ -800,8 +799,7 @@ unspecified strand symbol: {}.'.format(gene.strand)
         # plotting
         plt.plot(plot_cov, 'blue')
         plt.show()
-        gen_int = sub_var(sub_user(get_int(gene, gene_cov), gene.strand,
-                                   e_list), var_db)
+        gen_int = sub_var(get_int(gene, gene_cov), var_db)
         output = estimate_energy(database,
                                  fasta_index,
                                  gene,
