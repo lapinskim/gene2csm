@@ -823,7 +823,7 @@ unspecified strand symbol: {}.'.format(gene.strand)
             continue
 
         if file_prefix:
-            fn = file_prefix + '.result.csv'
+            fn = file_prefix + target + '.result.csv'
         else:
             fn = target + '.result.csv'
         print('\nWriting file {}.'.format(fn))
