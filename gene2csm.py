@@ -832,7 +832,10 @@ unspecified strand symbol: {}.'.format(gene.strand)
     return result
 
 
-# TODO: things to consider when doing a rewrite
+# TODO:
+# !!! Check if the processed sequence is within the picked transcript !!!
+#
+# things to consider when doing a rewrite
 # -- minor gain would be to run RNAcofold -p instead of -a
 # and not calculate the dG of AA complex formation
 
