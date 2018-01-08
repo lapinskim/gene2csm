@@ -822,7 +822,7 @@ unspecified strand symbol: {}.'.format(gene.strand)
             continue
 
         fn = target + '.result.csv'
-        print('\Writing file {}.'.format(fn))
+        print('\nWriting file {}.'.format(fn))
         with open(fn, 'w') as handle:
             for item in output:
                 handle.write(','.join([str(e) for e in item]) + '\n')
