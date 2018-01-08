@@ -115,7 +115,13 @@ def sub_user(intervals, strand, user_list=None):
 
     i_list = intervals
     if user_list is not None:
-        sorted_list = sorted(user_list, reverse=True)
+        # check if exon numbers are within the exon range of the target
+        for e in user_list:
+            assert 1 <= e <= len(intervals), 'Number {} not within the target\'s \
+CDS containing exon range: 1 - {}.'.format(e, len(intervals))
+        # convert to set, to delete, numbered exon only (unique)
+        # and reverse sort to delete from the end of the list
+        sorted_list = sorted(set(user_list), reverse=True)
         if strand == "-":
             for e in sorted_list:
                 del i_list[-e]
@@ -138,7 +144,7 @@ def sub_var(intervals, variation_fn):
     # make some basic checks
     assert intervals != [], 'No intervals to process.'
     assert os.path.exists(variation_fn), 'GVF file does not exist.'
-    assert variation_fn.endswith(('gvf', 'gvf.gz')), 'Ensure the variation\
+    assert variation_fn.endswith(('gvf', 'gvf.gz')), 'Ensure the variation \
 containing file is in a GVF format. \'.gvf\' extension missing.'
 
     gvf_sorted_fn = 'sorted.gvf'.join(variation_fn.split('gvf'))
@@ -440,7 +446,7 @@ preferably HAVANA annotated transcript for free energy calculations.')
                         max_exons = t_exo
                         max_source = t_sou
                 elif t_len == max_len:
-                    print('W: Discarding transcript {}, source: {},\
+                    print('W: Discarding transcript {}, source: {}, \
 of equal length: {!s} to {}'.format(t_id,
                                     t_sou,
                                     t_len,
@@ -785,7 +791,7 @@ def gene2csm(database,
         print('\n---\n')
         gene = database[target]
         # important assertion- has a specified strand
-        assert gene.strand == '+' or gene.strand == '-', 'Target gene has\
+        assert gene.strand == '+' or gene.strand == '-', 'Target gene has \
 unspecified strand symbol: {}.'.format(gene.strand)
         g_name = gene['gene_name'][0]
         print(g_name)
