@@ -397,7 +397,7 @@ def pick_transcript(database, fasta_index, gene=None, eid=None):
     '''
 
     if not eid:
-        print('No transcript Ensemble ID specified.\nPicking the longest,\
+        print('No transcript Ensemble ID specified.\nPicking the longest, \
 preferably HAVANA annotated transcript for free energy calculations.')
         max_len = 0
         max_id = None
