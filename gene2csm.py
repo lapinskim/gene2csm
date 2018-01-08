@@ -129,7 +129,7 @@ CDS containing exon range: 1 - {}.'.format(e, len(intervals))
             for e in sorted_list:
                 del i_list[e - 1]
         print('Omitting user submitted *CDS containing exons*: {}.'
-              .format(', '.join(str(e) for e in sorted_list)))
+              .format(', '.join(str(e).join('.') for e in sorted_list)))
     return i_list
 
 
