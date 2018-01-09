@@ -36,7 +36,7 @@ and `Pipfile.lock` into the new virtual environment.
 #### Quick installation with [`conda`](https://conda.io/docs/ "conda")
 For `jupyter` and non-pythonic dependencies run
 ```
-conda install -c conda-forge -c bioconda jupyter bedtools blast=2.7.1 viennarna
+conda install -c defaults -c conda-forge -c bioconda jupyter bedtools blast=2.7.1 viennarna
 ```
 
 ## Requirements
