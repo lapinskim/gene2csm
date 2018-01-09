@@ -796,7 +796,7 @@ def gene2csm(database,
 unspecified strand symbol: {}.'.format(gene.strand)
         g_name = gene['gene_name'][0]
         print(g_name)
-        # if present get an exlusion list for this target
+        # if present get an exclusion list for this target
         if target in exclude_dict:
             e_list = exclude_dict[target]
         gene_cov = get_cov(database, gene)
