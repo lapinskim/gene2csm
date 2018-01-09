@@ -4,6 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
+import string
 from multiprocessing import Pool
 from collections import Counter
 from decimal import Decimal
@@ -656,24 +657,25 @@ def estimate_energy(database,
     return result_list
 
 
-def processing_input(string):
+def processing_input(string_in):
     '''
     Process the input sequence
     Return the elements needed for further steps.
     '''
 
     # quick checks
-    assert isinstance(string, str), 'Input not a string.'
-    assert len(string) != 0, 'Input empty.'
+    assert isinstance(string_in, str), 'Input not a string.'
+    assert len(string_in) != 0, 'Input empty.'
     # take care of white spaces
-    sequence = string.strip()
+    sequence = string_in.strip()
     assert sequence.upper().startswith(('>', 'A', 'G', 'C', 'T')),\
         'Input not a DNA sequence in FASTA format or PLAIN.'
 
     # if fasta, get the sequence id from the header
     if sequence.startswith('>'):
         id_line, seq = sequence.split('\n', maxsplit=1)
-        seq_id = id_line.lstrip('>').split()[0]
+        # strip it of all punctuation and white space characters characters
+        seq_id = id_line.lstrip('>').split()[0].split(string.punctuation)[0]
     else:
         seq_id = 'plain'
         seq = sequence
