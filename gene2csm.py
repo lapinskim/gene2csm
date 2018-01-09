@@ -797,8 +797,9 @@ unspecified strand symbol: {}.'.format(gene.strand)
         g_name = gene['gene_name'][0]
         print(g_name)
         # if present get an exclusion list for this target
-        if target in exclude_dict:
-            e_list = exclude_dict[target]
+        if exclude_dict:
+            if target in exclude_dict:
+                e_list = exclude_dict[target]
         gene_cov = get_cov(database, gene)
         cov_lims = coverage_limit
         if coverage_limit == 'max':
