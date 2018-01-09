@@ -592,7 +592,7 @@ def processing_fun(input_list):
         revcomp(revtranscribe(c_seq)))
     c_pos_ent = entropy[c_start:c_start + len(c_seq)]
     c_mean_ent = sum(c_pos_ent) / len(c_pos_ent)
-    # estimate also the change in free energy of monomer binding to itself,
+    # estimate also the change in free energy of monomer binding to itself
     energy = run_RNAcofold(c_seq)
     dG_AA = energy['dG']
     G_A = energy['A']
