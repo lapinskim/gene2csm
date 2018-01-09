@@ -23,8 +23,8 @@ See the included Jupyter [notebook](./gene2csm.ipynb).
 
 ## Installation
 
-#### Quick instalation with [`pipenv`](http://pipenv.readthedocs.io/en/latest/ "pipenv")
-To satisfy `python` dependencies install `pipenv` using `pip` or your prefered
+#### Quick installation with [`pipenv`](http://pipenv.readthedocs.io/en/latest/ "pipenv")
+To satisfy `python` dependencies install `pipenv` using `pip` or your preferred
 package manager. Then run
 ```
 pipenv install
@@ -41,7 +41,7 @@ conda install -c bioconda bedtools blast viennarna
 
 ## Requirements
 
-Ensembl GTF annotaion file, soft masked genomic sequence FASTA file and GVF
+Ensembl GTF annotation file, soft masked genomic sequence FASTA file and GVF
 variation file are required, unless working only on user input (without any
 database sequence lookup). 
 
@@ -57,7 +57,7 @@ Download the required files from [Ensembl FTP site](https://www.ensembl.org/info
 
 1. Specificity (within target organism)
 
-   Every sequence is the subject of BLAST \[[1](#r1)\] database search of coding and non-coding RNA sequences within the target organism to exclude off-traget effects of highly homologous sequences.
+   Every sequence is the subject of BLAST \[[1](#r1)\] database search of coding and non-coding RNA sequences within the target organism to exclude off-target effects of highly homologous sequences.
 
 2. Isoform prevalence
 
@@ -106,8 +106,8 @@ The output table is sorted by the `score` column and contains 50 best scoring cR
 * 1st column contains a unique _index_ number; the numbering follows the genomic start position of the crRNA in descending order, starting from 0;
 * `seq` column contains a sequence of the putative crRNA; reverse-complementary to the chosen target transcript;
 * `GC` column contains the %GC content of the crRNA
-* `ent` column contains the mean positional entropy value of the target mRNA sequence in the binding position of crRNA; it describes the structural well-definednes of the region; the higher the better;
-* `dG_AA` column contains the change in Gibbs free energy of the homodimer duplex created by two crRNA oligos; the higher (less negative) the better- the less stable the homodimer complex is
+* `ent` column contains the mean positional entropy value of the target mRNA sequence in the binding position of crRNA; it describes the structural well-definedness of the region; the higher the better;
+* `dG_AA` column contains the change in Gibbs free energy of the homodimer duplex created by two crRNA oligonucleotides; the higher (less negative) the better- the less stable the homodimer complex is
 * `G_A` column stores the Gibbs free energy of the monomeric crRNA, the higher (less negative) the better- the less structured the monomer is;
 * `bitscore` column contains the bitscore value of the best alignment of the sequence to the sequences from the database as defined by the BLAST algorithm; the lower the better
 * `nident` column contains the number of identical matching nucleotides in the best scoring blast alignment of the crRNA to the sequences from the database; the lower the better;
