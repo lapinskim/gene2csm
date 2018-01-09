@@ -848,7 +848,11 @@ unspecified strand symbol: {}.'.format(gene.strand)
 
 
 # TODO:
-# !!! Check if the processed sequence is within the picked transcript !!!
+#
+# Better handling of finding sequences within the folded transcript
+# * pass the exon coordinates
+# * compute the exon lengths
+# * compute the sequence relative coordinates within the transcript
 #
 # things to consider when doing a rewrite
 # -- minor gain would be to run RNAcofold -p instead of -a
