@@ -781,7 +781,7 @@ def gene2csm(database,
              GC_limit,
              n_threads,
              coverage_limit='max',
-             e_list=None,
+             exclude_dict=None,
              file_prefix=None):
     '''
     Main function to run the program.
@@ -791,11 +791,14 @@ def gene2csm(database,
     for target in target_lst:
         print('\n---\n')
         gene = database[target]
-        # important assertion- has a specified strand
+        # important assertion- gene has a specified strand
         assert gene.strand == '+' or gene.strand == '-', 'Target gene has \
 unspecified strand symbol: {}.'.format(gene.strand)
         g_name = gene['gene_name'][0]
         print(g_name)
+        # if present get an exlusion list for this target
+        if target in exclude_dict:
+            e_list = exclude_dict[target]
         gene_cov = get_cov(database, gene)
         cov_lims = coverage_limit
         if coverage_limit == 'max':
@@ -807,8 +810,10 @@ unspecified strand symbol: {}.'.format(gene.strand)
         # plotting
         plt.plot(plot_cov, 'blue')
         plt.show()
-        gen_int = sub_var(sub_usr(get_int(gene, gene_cov), gene.strand,
-                                  e_list), var_db)
+        gen_int = sub_var(sub_usr(get_int(gene, gene_cov),
+                                  gene.strand,
+                                  e_list),
+                          var_db)
         output = estimate_energy(database,
                                  fasta_index,
                                  gene,
