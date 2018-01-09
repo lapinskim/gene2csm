@@ -4,7 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
-import string
+import re
 from multiprocessing import Pool
 from collections import Counter
 from decimal import Decimal
@@ -674,8 +674,10 @@ def processing_input(string_in):
     # if fasta, get the sequence id from the header
     if sequence.startswith('>'):
         id_line, seq = sequence.split('\n', maxsplit=1)
-        # strip it of all punctuation and white space characters characters
-        seq_id = id_line.lstrip('>').split()[0].split(string.punctuation)[0]
+        # strip it of all non-alphanumeric characters (allow '_')
+        pattern = re.compile(r'\W+')
+        # first element is empty (because of '>'), second is SeqID
+        seq_id = pattern.split(id_line, maxsplit=2)[1]
     else:
         seq_id = 'plain'
         seq = sequence
