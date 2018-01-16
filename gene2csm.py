@@ -657,6 +657,39 @@ def estimate_energy(database,
     return result_list
 
 
+def parse_fasta(file_name):
+    '''
+    Return a generator object yielding sequences from the FASTA file
+
+    Joins sequences separated by new lines (only yields on '>'),
+    deletes whitespaces within the sequences.
+    '''
+
+    assert os.path.exists(file_name), 'File does not exist.'
+
+    with open(file_name, 'r') as handle:
+        entry = ''
+        new_entry = 1
+        for l in handle:
+            line = l.strip('\n ')
+            if line.startswith('>') and new_entry == 1:
+                # start new entry
+                entry = line + '\n'
+                new_entry = 0
+            elif len(line) != 0 and not line.startswith('>') \
+                    and new_entry == 0:
+                # extend entry, delete all the whitespaces
+                entry += line.replace(' ', '')
+            elif line.startswith('>') and new_entry == 0:
+                # yield previous entry, start next one
+                yield entry
+                entry = line + '\n'
+        # yield the last entry or throw an error if format was wrong
+        assert new_entry == 0, 'Sequence not in FASTA fromat.'
+        yield entry
+    return
+
+
 def processing_input(string_in):
     '''
     Process the input sequence
