@@ -750,7 +750,7 @@ def estimate_energy_input(input_sequence,
                           fasta_index=None,
                           proc=1):
     '''
-    Estimate free energy change for a single transcript.
+    Estimate free energy change for a single input sequence.
 
     Parameters:
     -----------
@@ -807,7 +807,7 @@ def estimate_energy_input(input_sequence,
         os.remove(ngsi_tmp)
     # RNAfold dot plot PS file
     os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
-    return result_list
+    return input_id, result_list
 
 
 def gene2csm(database,
