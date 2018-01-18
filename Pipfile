@@ -16,6 +16,7 @@ pybedtools = "*"
 pysam = "*"
 openpyxl = "*"
 numpy = "*"
+seaborn = "*"
 
 
 [dev-packages]
