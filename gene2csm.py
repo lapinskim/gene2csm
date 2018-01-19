@@ -882,6 +882,8 @@ unspecified strand symbol: {}.'.format(gene.strand)
 
 # TODO:
 #
+# Implement logging
+#
 # Better handling of finding sequences within the folded transcript
 # * pass the exon coordinates
 # * compute the exon lengths
