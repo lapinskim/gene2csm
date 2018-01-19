@@ -35,13 +35,17 @@ def create_plots(entropy_list, suptitle=None, style=None):
 
     # create a grid with two columns if more than one plot is plotted
     n_items = len(entropy_list)
-    n_cols = 2
-    if n_items % 2 == 0:
-        n_rows = n_items / 2
+
+    if n_items == 1:
+        n_rows, n_cols = (1, 1)
     else:
-        n_rows = (n_items // 2) + 1
+        n_cols = 2
+        if n_items % 2 == 0:
+            n_rows = n_items / 2
+        else:
+            n_rows = (n_items // 2) + 1
     # adjust the figure size accordingly to the number of plots in the figure
-    plt.figure(figsize=(14, n_rows * 5)).set_tight_layout(True)
+    plt.figure(figsize=(7 * n_cols, n_rows * 5)).set_tight_layout(True)
     # create all axes and figures
     index = 1
     for item_id, item_ent in entropy_list:
