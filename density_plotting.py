@@ -35,14 +35,15 @@ def create_plots(entropy_list, suptitle=None, style=None):
 
     # create a grid with two columns if more than one plot is plotted
     n_items = len(entropy_list)
-    if n_items == 1:
-        n_rows, n_cols = (1, 1)
+
+    # if n_items == 1:
+    #     n_rows, n_cols = (1, 2)
+    # else:
+    n_cols = 2
+    if n_items % 2 == 0:
+        n_rows = n_items / 2
     else:
-        n_cols = 2
-        if n_items % 2 == 0:
-            n_rows = n_items / 2
-        else:
-            n_rows = (n_items // 2) + 1
+        n_rows = (n_items // 2) + 1
     # adjust the figure size accordingly to the number of plots in the figure
     plt.figure(figsize=(14, n_rows * 5)).set_tight_layout(True)
     # create all axes and figures
@@ -105,9 +106,6 @@ def draw_plot(entropy, title=None):
                 alpha=1,
                 bw=0.2,
                 ax=ax2)
-    # adjust the scale of the kde plot,
-    # so that it would match the original sns.distplot scale
-    # ax2.set_ylim((0, 1.2))
     # annotate the second y axis
     ax2.set_ylabel('kde (density)')
     # add some styling
@@ -119,7 +117,7 @@ def draw_plot(entropy, title=None):
                               erange,
                               mean,
                               pstdev),
-                      loc=2, prop=dict(size=14), frameon=True)
+                      loc=2, prop=dict(size=12), frameon=True)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
 
