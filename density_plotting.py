@@ -35,10 +35,6 @@ def create_plots(entropy_list, suptitle=None, style=None):
 
     # create a grid with two columns if more than one plot is plotted
     n_items = len(entropy_list)
-
-    # if n_items == 1:
-    #     n_rows, n_cols = (1, 2)
-    # else:
     n_cols = 2
     if n_items % 2 == 0:
         n_rows = n_items / 2
