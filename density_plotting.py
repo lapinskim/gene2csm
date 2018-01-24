@@ -4,9 +4,7 @@ from decimal import Decimal
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import gene2csm
-# for hiding print
-import os
-import sys
+
 
 sns.set()
 sns.set_style('ticks')
@@ -16,16 +14,6 @@ sns.set_context("talk")
 
 # change the default False, if boarders are needed
 # plt.rcParams.update({"patch.force_edgecolor": False})
-
-
-# temporary solution before the logging is implemented
-class HiddenPrints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout = self._original_stdout
 
 
 def create_plots(entropy_list, suptitle=None, style=None):
@@ -139,14 +127,13 @@ def files2plot(fasta_fn, paths, crRNA_len=36, GC_limit=(0, 100), proc=1,
         energy_dict = defaultdict(list)
         # calculate for each sequence in the fasta file
 
-        # hide the prints for plotting- temporary solution
-        with HiddenPrints():
-            for seq in gene2csm.parse_fasta(file_dict[key]):
-                seq_id, result = gene2csm.estimate_energy_input(seq,
-                                                                crRNA_len,
-                                                                GC_limit,
-                                                                proc=7)
-                entropy = [float(round(e[3], 3)) for e in result]
-                energy_dict[key].append((seq_id, entropy))
+        for seq in gene2csm.parse_fasta(file_dict[key]):
+            seq_id, result = gene2csm.estimate_energy_input(seq,
+                                                            crRNA_len,
+                                                            GC_limit,
+                                                            proc=proc,
+                                                            verbose=False)
+            entropy = [float(round(e[3], 3)) for e in result]
+            energy_dict[key].append((seq_id, entropy))
         create_plots(energy_dict[key], suptitle=key, style=supstyle)
     return
