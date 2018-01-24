@@ -1,6 +1,7 @@
 # Imports
 import pandas as pd
 from decimal import Decimal
+import logging
 
 
 def prepare_output(result, n_store=50, write=True, file_prefix=None):
@@ -64,6 +65,33 @@ def prepare_output(result, n_store=50, write=True, file_prefix=None):
                 xlsx_fn = file_prefix + key + '.csm.xlsx'
             else:
                 xlsx_fn = key + '.csm.xlsx'
-            print('Writing file {}.'.format(xlsx_fn))
+            log.info('Writing file {}.', xlsx_fn)
             final_dict[key].to_excel(xlsx_fn)
     return final_dict
+
+
+# set logging
+
+# create logger with the module name
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+# create console handler for all but info levels
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+# now for info
+chi = logging.StreamHandler()
+chi.setLevel(logging.INFO)
+# now for DEBUG
+chd = logging.StreamHandler()
+chd.setLevel(logging.DEBUG)
+# create formatters and add them to the handlers
+basic_formatter = logging.Formatter(
+    fmt='%(asctime)s:%(name)s:%(levelname)s: %(message)s', style='{')
+info_formatter = logging.Formatter(fmt='%(message)s', datefmt=None, style='{')
+ch.setFormatter(basic_formatter)
+chi.setFormatter(info_formatter)
+chd.setFormatter(basic_formatter)
+# add the handlers to the logger
+log.addHandler(ch)
+log.addHandler(chi)
+log.addHandler(chd)
