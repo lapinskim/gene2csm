@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
 import re
+import logging
 from multiprocessing import Pool
 from collections import Counter
 from decimal import Decimal
@@ -14,9 +15,10 @@ from pybedtools import BedTool
 
 
 def revcomp(seq):
-    # reverse complement sequence
+    '''
+    Reverse complement sequence
+    '''
 
-    assert isinstance(seq, str)
     # check if sequence is RNA
     if seq.upper().find('U') == -1:
         # DNA
@@ -31,36 +33,41 @@ def revcomp(seq):
 
 
 def gc(seq):
-    # return GC content percentage
+    '''
+    Return GC content percentage
+    '''
 
-    assert isinstance(seq, str)
     seq = seq.upper()
     gc_content = 100 * Decimal(seq.count("G") + seq.count("C")) / len(seq)
     return gc_content
 
 
 def transcribe(seq):
-    # transcribe sequence- change T to U
+    '''
+    Transcribe sequence- change T to U
+    '''
 
-    assert isinstance(seq, str)
     trans_seq = seq.replace('T', 'U').replace('t', 'u')
     return trans_seq
 
 
 def revtranscribe(seq):
-    # reverse transcribe sequence- change U to T
+    '''
+    Reverse transcribe sequence- change U to T
+    '''
 
-    assert isinstance(seq, str)
     trans_seq = seq.replace('U', 'T').replace('u', 't')
     return trans_seq
 
 
 def get_cov(database, gene):
-    # Create genomic sequence coverage by CDS (without STOP codon).
+    '''
+    Create genomic sequence coverage by CDS (without STOP codon).
+    '''
 
     # get the length of the gene (1 based coords)
     gene_length = gene.end - gene.start + 1
-    print('{} loci length: {!s}.'.format(gene.id, gene_length))
+    log.info('{} loci length: {}.', gene.id, gene_length)
     # create a numpy array of zeros with the length of the gene
     gene_cov = np.zeros(gene_length, dtype=int)
     for cds in database.children(gene, featuretype='CDS', order_by='start'):
@@ -68,13 +75,15 @@ def get_cov(database, gene):
             rel_start = cds.start - gene.start
             rel_end = cds.end - gene.start
             gene_cov[rel_start:rel_end + 1] += 1
-    print('Maximal genomic sequence coverage by CDS: {!s}.'
-          .format(gene_cov.max()))
+    log.info('Maximal genomic sequence coverage by CDS: {}.',
+             gene_cov.max())
     return gene_cov
 
 
 def get_int(gene, genomic_coverage):
-    # get the genomic intervals (for sequence retrieval)
+    '''
+    Get the genomic intervals (for sequence retrieval)
+    '''
 
     gen_int = []
     cov = 0
@@ -104,8 +113,8 @@ def get_int(gene, genomic_coverage):
     i_cnt = Counter()
     for e in gen_int:
         i_cnt[e[3]] += 1
-    print('{!s} CDS coverage intervals (coverage, count): {!s}.'
-          .format(len(gen_int), i_cnt.most_common()))
+    log.info('{} CDS coverage intervals (coverage, count): {}.',
+             len(gen_int), i_cnt.most_common())
     return gen_int
 
 
@@ -118,8 +127,13 @@ def sub_usr(intervals, strand, user_list=None):
     if user_list is not None:
         # check if exon numbers are within the exon range of the target
         for e in user_list:
-            assert 1 <= e <= len(intervals), 'Number {} not within the target\'s \
-CDS containing exon range: 1 - {}.'.format(e, len(intervals))
+            try:
+                if not 1 <= e <= len(intervals):
+                    raise Exception('Wrong exon number')
+            except Exception as e:
+                log.exception('Number {} not within the target\'s \
+CDS containing exon range: 1 - {}.', e, len(intervals))
+                raise
         # convert to set, to delete, numbered exon only (unique)
         # and reverse sort to delete from the end of the list
         sorted_list = sorted(set(user_list), reverse=True)
@@ -129,8 +143,9 @@ CDS containing exon range: 1 - {}.'.format(e, len(intervals))
         elif strand == "+":
             for e in sorted_list:
                 del i_list[e - 1]
-        print('Omitting user submitted *CDS containing exons*: {}.'
-              .format(', '.join(str(e) + '.' for e in sorted_list[::-1])))
+                log.info('Omitting user submitted \
+*CDS containing exons*: {}.', ', '.join(str(e) + '.' for e in
+                                        sorted_list[::-1]))
     return i_list
 
 
@@ -143,27 +158,47 @@ def sub_var(intervals, variation_fn):
     '''
 
     # make some basic checks
-    assert intervals != [], 'No intervals to process.'
-    assert os.path.exists(variation_fn), 'GVF file does not exist.'
-    assert variation_fn.endswith(('gvf', 'gvf.gz')), 'Ensure the variation \
-containing file is in a GVF format. \'.gvf\' extension missing.'
+    try:
+        if intervals == []:
+            raise Exception('Empty list')
+    except Exception as e:
+        log.exception('No intervals to process.')
+        raise
+    try:
+        if not os.path.exists(variation_fn):
+            raise Exception('File does not exist.')
+    except Exception as e:
+        log.exception('GVF file does not exist.')
+        raise
+    try:
+        if not variation_fn.endswith(('gvf', 'gvf.gz')):
+            raise Exception('Bad extension')
+    except Exception as e:
+        log.exception('Ensure the variation \
+containing file is in a GVF format. \'.gvf\' extension missing.')
+        raise
 
     gvf_sorted_fn = 'sorted.gvf'.join(variation_fn.split('gvf'))
     # sort the variation database for faster processing and store
     # for further use
     if not os.path.exists(gvf_sorted_fn):
-        print('Sorting and saving the new GVF file as {}.'
-              .format(gvf_sorted_fn))
+        log.info('Sorting and saving the new GVF file as {}.',
+                 gvf_sorted_fn)
         gvf_bt = BedTool(variation_fn).sort().saveas(gvf_sorted_fn)
     else:
         gvf_bt = BedTool(gvf_sorted_fn)
 
-    print('Subtracting variation from {}.'
-          .format(gvf_bt[1]['Dbxref'].split(':')[0]))
+    log.info('Subtracting variation from {}.',
+             gvf_bt[1]['Dbxref'].split(':')[0])
 
     # make sure the format is right
     for e in intervals:
-        assert len(e) == 4
+        try:
+            if not len(e) == 4:
+                raise Exception('Wrong format')
+        except Exception as e:
+            log.exception('Wrong input format')
+            raise
     # perform genome arithmetic's
     gi_gv = BedTool(('\t'
                      .join([c, str(s), str(e), '.', str(cov)]) for c, s, e, cov
@@ -194,8 +229,9 @@ def get_seq(fasta_index, intervals, coverage, length):
     seg_len = 0
     for e in seg_lst:
         seg_len += len(e[1])
-    print('Processing {!s} nucleotides in {!s} segments.'
-          .format(seg_len, len(seg_lst)))
+    log.info('Processing {} nucleotides in {} segments.',
+             seg_len,
+             len(seg_lst))
     return seg_lst
 
 
@@ -253,12 +289,12 @@ def count_seq(segments, length, GC_lims):
             else:
                 sm_droped += 1
     total = GC_high + GC_low + sm_droped + good
-    print('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, sm = {})'
-          .format(good,
-                  total,
-                  GC_low,
-                  GC_high,
-                  sm_droped))
+    log.info('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, sm = {})',
+             good,
+             total,
+             GC_low,
+             GC_high,
+             sm_droped)
     return good
 
 
@@ -281,7 +317,7 @@ def run_RNAcofold(seq):
                           input=in_str,
                           encoding='ascii')
     if proc.returncode != 0:
-        print(proc.stderr)
+        log.error('Subprocess exception: ' + proc.stderr)
         proc.check_returncode()
     else:
         result = proc.stdout.split(',')
@@ -305,7 +341,12 @@ def get_tmpfs():
     tmp_dir = os.path.join('/dev', 'shm')
     if not os.path.exists(tmp_dir):
         tmp_dir = os.path.join('/run', 'shm')
-    assert os.path.exists(tmp_dir)
+    try:
+        if not os.path.exists(tmp_dir):
+            raise Exception('Directory does not exist.')
+    except Exception as e:
+        log.exception('TMPFS directory does not exist.')
+        raise
     return tmp_dir
 
 
@@ -334,18 +375,23 @@ def run_RNAfold(transcript_id, transcript_seq):
                            encoding='ascii',
                            cwd=tmp_dir)
     if proc1.returncode != 0:
-        print(proc1.stderr)
+        log.error('Subprocess exception: ' + proc1.stderr)
         proc1.check_returncode()
 
     out_fn = os.path.join(tmp_dir, transcript_id + '_dp.ps')
-    assert os.path.exists(out_fn)
+    try:
+        if not os.path.exists(out_fn):
+            raise Exception('File does not exist.')
+    except Exception as e:
+        log.exception('Output file does not exist.')
+        raise
 
     proc2 = subprocess.run(['mountain.pl', out_fn],
                            stderr=subprocess.PIPE,
                            stdout=subprocess.PIPE,
                            cwd=tmp_dir)
     if proc2.returncode != 0:
-        print(proc2.stderr)
+        log.error('Subprocess exception: ' + proc2.stderr)
         proc2.check_returncode()
     else:
         data = proc2.stdout.decode('ascii').split('\n')
@@ -398,7 +444,7 @@ def pick_transcript(database, fasta_index, gene=None, eid=None):
     '''
 
     if not eid:
-        print('No transcript Ensemble ID specified.\nPicking the longest, \
+        log.info('No transcript Ensemble ID specified.\nPicking the longest, \
 preferably HAVANA annotated transcript for free energy calculations.')
         max_len = 0
         max_id = None
@@ -447,15 +493,16 @@ preferably HAVANA annotated transcript for free energy calculations.')
                         max_exons = t_exo
                         max_source = t_sou
                 elif t_len == max_len:
-                    print('W: Discarding transcript {}, source: {}, \
-of equal length: {!s} to {}'.format(t_id,
-                                    t_sou,
-                                    t_len,
-                                    max_id))
-        print('Target: {}, source: {}, length: {!s}'
-              .format(max_id,
-                      max_source,
-                      max_len))
+                    log.info('W: Discarding transcript {}, source: {}, \
+of equal length: {} to {}',
+                             t_id,
+                             t_sou,
+                             t_len,
+                             max_id)
+        log.info('Target: {}, source: {}, length: {}',
+                 max_id,
+                 max_source,
+                 max_len)
         max_seq = None
         for exon_coord in max_exons:
             if not max_seq:
@@ -481,10 +528,10 @@ of equal length: {!s} to {}'.format(t_id,
                                  .seq[exon.start - 1:exon.end])
         if transcript.strand == '-':
             trans_seq = revcomp(trans_seq)
-        print('Target: {}, source: {}, length: {!s}'
-              .format(transcript.id,
-                      transcript['transcript_source'][0],
-                      len(trans_seq)))
+        log.info('Target: {}, source: {}, length: {}',
+                 transcript.id,
+                 transcript['transcript_source'][0],
+                 len(trans_seq))
         return transcript.id, trans_seq
 
 
@@ -525,7 +572,12 @@ def blast_it(sequence, tmp_file=None):
 
     # TODO: take out the blastdb parameter
 
-    assert isinstance(sequence, str)
+    try:
+        if not isinstance(sequence, str):
+            raise Exception('Wrong type')
+    except Exception as e:
+        log.exception('Input not a string')
+        raise
 
     params = ['-task', 'blastn',
               '-word_size', '7',
@@ -588,8 +640,13 @@ def processing_fun(input_list):
     # t_seq.upper() required in case of working with user-input
     # and targeting soft masked sequence
     c_start = t_seq.upper().find(revcomp(revtranscribe(c_seq)))
-    assert c_start != -1, 'Target sequence not found: {}'.format(
-        revcomp(revtranscribe(c_seq)))
+    try:
+        if c_start == -1:
+            raise Exception('Pattern not found')
+    except Exception as e:
+        log.exception('Target sequence not found: {}',
+                      revcomp(revtranscribe(c_seq)))
+        raise
     c_pos_ent = entropy[c_start:c_start + len(c_seq)]
     c_mean_ent = sum(c_pos_ent) / len(c_pos_ent)
     # estimate also the change in free energy of monomer binding to itself
@@ -609,7 +666,8 @@ def estimate_energy(database,
                     length,
                     GC_lims,
                     ensembl_id=None,
-                    proc=1):
+                    proc=1,
+                    verbose=True):
     '''
     Estimate free energy change for a single transcript
     '''
@@ -641,12 +699,13 @@ def estimate_energy(database,
     done = 0
     for result in pool.imap_unordered(processing_fun, iterator,
                                       chunksize=1):
-        done += 1
-        progress = str(done) + '/' + str(total)
-        percent = str(round(100 * Decimal(done) / Decimal(total), 1)) + '%'
-        out = '{} ({})'.format(progress, percent)
-        print(out, end='', flush=True)
-        print('\r', end='')
+        if verbose:
+            done += 1
+            progress = str(done) + '/' + str(total)
+            percent = str(round(100 * Decimal(done) / Decimal(total), 1)) + '%'
+            out = '{} ({})'.format(progress, percent)
+            print(out, end='', flush=True)
+            print('\r', end='')
         result_list.append(result)
 
     # clean up
@@ -664,8 +723,6 @@ def parse_fasta(file_name):
     Joins sequences separated by new lines (only yields on '>'),
     deletes whitespaces within the sequences.
     '''
-
-    assert os.path.exists(file_name), 'File does not exist.'
 
     with open(file_name, 'r') as handle:
         entry = ''
@@ -685,7 +742,12 @@ def parse_fasta(file_name):
                 yield entry
                 entry = line + '\n'
         # yield the last entry or throw an error if format was wrong
-        assert new_entry == 0, 'Sequence not in FASTA fromat.'
+        try:
+            if not new_entry == 0:
+                raise Exception('Wrong input format')
+        except Exception as e:
+            log.exception('Sequence not in FASTA fromat.')
+            raise
         yield entry
     return
 
@@ -697,12 +759,20 @@ def processing_input(string_in):
     '''
 
     # quick checks
-    assert isinstance(string_in, str), 'Input not a string.'
-    assert len(string_in) != 0, 'Input empty.'
+    try:
+        if len(string_in) == 0:
+            raise Exception('Input empty')
+    except Exception as e:
+        log.exception('Input empty')
+        raise
     # take care of white spaces
     sequence = string_in.strip()
-    assert sequence.upper().startswith(('>', 'A', 'G', 'C', 'T')),\
-        'Input not a DNA sequence in FASTA format or PLAIN.'
+    try:
+        if not sequence.upper().startswith(('>', 'A', 'G', 'C', 'T')):
+            raise Exception('Wrong input format')
+    except Exception as e:
+        log.exception('Input not a DNA sequence in FASTA format or PLAIN.')
+        raise
 
     # if fasta, get the sequence id from the header
     if sequence.startswith('>'):
@@ -732,13 +802,13 @@ def check_segid(database, input_id):
     try:
         feature = database[input_id]
     except gffutils.FeatureNotFoundError:
-        print('Feature \'{}\' not found in the database.'.format(input_id))
+        log.warning('Feature \'{}\' not found in the database.', input_id)
         return False
     else:
         if feature.featuretype == 'transcript':
             return True
         else:
-            print('\'{}\' is not a valid Transcript ID.'.format(input_id))
+            log.warning('\'{}\' is not a valid Transcript ID.', input_id)
             return False
 
 
@@ -748,7 +818,8 @@ def estimate_energy_input(input_sequence,
                           strand='+',
                           database=None,
                           fasta_index=None,
-                          proc=1):
+                          proc=1,
+                          verbose=True):
     '''
     Estimate free energy change for a single input sequence.
 
@@ -775,7 +846,7 @@ def estimate_energy_input(input_sequence,
                                                         fasta_index,
                                                         eid=input_id)
     else:
-        print('Using the provided sequence for free energy calculation.')
+        log.info('Using the provided sequence for free energy calculation.')
         transcript_id, transcript_seq = input_id, input_seq
 
     result_list = []
@@ -793,12 +864,13 @@ def estimate_energy_input(input_sequence,
     done = 0
     for result in pool.imap_unordered(processing_fun, iterator,
                                       chunksize=1):
-        done += 1
-        progress = str(done) + '/' + str(total)
-        percent = str(round(100 * Decimal(done) / Decimal(total), 1)) + '%'
-        out = '{} ({})'.format(progress, percent)
-        print(out, end='', flush=True)
-        print('\r', end='')
+        if verbose:
+            done += 1
+            progress = str(done) + '/' + str(total)
+            percent = str(round(100 * Decimal(done) / Decimal(total), 1)) + '%'
+            out = '{} ({})'.format(progress, percent)
+            print(out, end='', flush=True)
+            print('\r', end='')
         result_list.append(result)
 
     # clean up
@@ -819,20 +891,26 @@ def gene2csm(database,
              n_threads,
              coverage_limit='max',
              exclude_dict=None,
-             file_prefix=None):
+             file_prefix=None,
+             verbose=True):
     '''
     Main function to run the program.
     '''
 
     result = []
     for target in target_lst:
-        print('\n---\n')
+        log.info('\n---\n')
         gene = database[target]
         # important assertion- gene has a specified strand
-        assert gene.strand == '+' or gene.strand == '-', 'Target gene has \
-unspecified strand symbol: {}.'.format(gene.strand)
+        try:
+            if not (gene.strand == '+' or gene.strand == '-'):
+                raise Exception('Wrong symbol')
+        except Exception as e:
+            log.exception('Target gene has unspecified strand symbol: {}.',
+                          gene.strand)
+            raise
         g_name = gene['gene_name'][0]
-        print(g_name)
+        log.info(g_name)
         # if present get an exclusion list for this target
         e_list = None
         if exclude_dict:
@@ -863,27 +941,51 @@ unspecified strand symbol: {}.'.format(gene.strand)
                                  proc=n_threads)
         # do not store the empty results
         if output == -1:
-            print('No valid segments for target {}:{}'.foramt(target, g_name))
+            log.warning('No valid segments for target {}:{}', target, g_name)
             continue
 
         if file_prefix:
             fn = file_prefix + target + '.result.csv'
         else:
             fn = target + '.result.csv'
-        print('\nWriting file {}.'.format(fn))
+        log.info('\nWriting file {}.', fn)
         with open(fn, 'w') as handle:
             for item in output:
                 handle.write(','.join([str(e) for e in item]) + '\n')
 
         result.append((g_name, output))
-        print('\nDone.')
+        log.info('\nDone.')
     return result
 
 
+# set logging
+
+# create logger with the module name
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+# create console handler for all but info levels
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+# now for info
+chi = logging.StreamHandler()
+chi.setLevel(logging.INFO)
+# now for DEBUG
+chd = logging.StreamHandler()
+chd.setLevel(logging.DEBUG)
+# create formatters and add them to the handlers
+basic_formatter = logging.Formatter(
+    fmt='%(asctime)s:%(name)s:%(levelname)s: %(message)s', style='{')
+info_formatter = logging.Formatter(fmt='%(message)s', datefmt=None, style='{')
+ch.setFormatter(basic_formatter)
+chi.setFormatter(info_formatter)
+chd.setFormatter(basic_formatter)
+# add the handlers to the logger
+log.addHandler(ch)
+log.addHandler(chi)
+log.addHandler(chd)
+
+
 # TODO:
-#
-# Implement logging
-#
 # Better handling of finding sequences within the folded transcript
 # * pass the exon coordinates
 # * compute the exon lengths
