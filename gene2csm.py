@@ -67,7 +67,7 @@ def get_cov(database, gene):
 
     # get the length of the gene (1 based coords)
     gene_length = gene.end - gene.start + 1
-    log.info('{} loci length: {}.', gene.id, gene_length)
+    log.info('{} loci length: {}.'.format(gene.id, gene_length))
     # create a numpy array of zeros with the length of the gene
     gene_cov = np.zeros(gene_length, dtype=int)
     for cds in database.children(gene, featuretype='CDS', order_by='start'):
@@ -75,8 +75,8 @@ def get_cov(database, gene):
             rel_start = cds.start - gene.start
             rel_end = cds.end - gene.start
             gene_cov[rel_start:rel_end + 1] += 1
-    log.info('Maximal genomic sequence coverage by CDS: {}.',
-             gene_cov.max())
+    log.info('Maximal genomic sequence coverage by CDS:\
+{}.'.format(gene_cov.max()))
     return gene_cov
 
 
@@ -113,8 +113,9 @@ def get_int(gene, genomic_coverage):
     i_cnt = Counter()
     for e in gen_int:
         i_cnt[e[3]] += 1
-    log.info('{} CDS coverage intervals (coverage, count): {}.',
-             len(gen_int), i_cnt.most_common())
+    log.info('{} CDS coverage intervals (coverage, count): {}.'.format(
+        len(gen_int),
+        i_cnt.most_common()))
     return gen_int
 
 
@@ -132,7 +133,7 @@ def sub_usr(intervals, strand, user_list=None):
                     raise Exception('Wrong exon number')
             except Exception as e:
                 log.exception('Number {} not within the target\'s \
-CDS containing exon range: 1 - {}.', e, len(intervals))
+CDS containing exon range: 1 - {}.'.format(e, len(intervals)))
                 raise
         # convert to set, to delete, numbered exon only (unique)
         # and reverse sort to delete from the end of the list
@@ -144,8 +145,8 @@ CDS containing exon range: 1 - {}.', e, len(intervals))
             for e in sorted_list:
                 del i_list[e - 1]
                 log.info('Omitting user submitted \
-*CDS containing exons*: {}.', ', '.join(str(e) + '.' for e in
-                                        sorted_list[::-1]))
+*CDS containing exons*: {}.'.format(', '.join(str(e) + '.' for e in
+                                              sorted_list[::-1])))
     return i_list
 
 
@@ -182,14 +183,14 @@ containing file is in a GVF format. \'.gvf\' extension missing.')
     # sort the variation database for faster processing and store
     # for further use
     if not os.path.exists(gvf_sorted_fn):
-        log.info('Sorting and saving the new GVF file as {}.',
-                 gvf_sorted_fn)
+        log.info('Sorting and saving the new GVF file as {}.'.format(
+            gvf_sorted_fn))
         gvf_bt = BedTool(variation_fn).sort().saveas(gvf_sorted_fn)
     else:
         gvf_bt = BedTool(gvf_sorted_fn)
 
-    log.info('Subtracting variation from {}.',
-             gvf_bt[1]['Dbxref'].split(':')[0])
+    log.info('Subtracting variation from {}.'.format(
+             gvf_bt[1]['Dbxref'].split(':')[0]))
 
     # make sure the format is right
     for e in intervals:
@@ -229,9 +230,9 @@ def get_seq(fasta_index, intervals, coverage, length):
     seg_len = 0
     for e in seg_lst:
         seg_len += len(e[1])
-    log.info('Processing {} nucleotides in {} segments.',
+    log.info('Processing {} nucleotides in {} segments.'.format(
              seg_len,
-             len(seg_lst))
+             len(seg_lst)))
     return seg_lst
 
 
@@ -289,12 +290,13 @@ def count_seq(segments, length, GC_lims):
             else:
                 sm_droped += 1
     total = GC_high + GC_low + sm_droped + good
-    log.info('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, sm = {})',
+    log.info('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, \
+sm = {})'.format(
              good,
              total,
              GC_low,
              GC_high,
-             sm_droped)
+             sm_droped))
     return good
 
 
@@ -494,15 +496,15 @@ preferably HAVANA annotated transcript for free energy calculations.')
                         max_source = t_sou
                 elif t_len == max_len:
                     log.info('W: Discarding transcript {}, source: {}, \
-of equal length: {} to {}',
+of equal length: {} to {}'.format(
                              t_id,
                              t_sou,
                              t_len,
-                             max_id)
-        log.info('Target: {}, source: {}, length: {}',
+                             max_id))
+        log.info('Target: {}, source: {}, length: {}'.format(
                  max_id,
                  max_source,
-                 max_len)
+                 max_len))
         max_seq = None
         for exon_coord in max_exons:
             if not max_seq:
@@ -528,10 +530,10 @@ of equal length: {} to {}',
                                  .seq[exon.start - 1:exon.end])
         if transcript.strand == '-':
             trans_seq = revcomp(trans_seq)
-        log.info('Target: {}, source: {}, length: {}',
+        log.info('Target: {}, source: {}, length: {}'.format(
                  transcript.id,
                  transcript['transcript_source'][0],
-                 len(trans_seq))
+                 len(trans_seq)))
         return transcript.id, trans_seq
 
 
@@ -644,8 +646,8 @@ def processing_fun(input_list):
         if c_start == -1:
             raise Exception('Pattern not found')
     except Exception as e:
-        log.exception('Target sequence not found: {}',
-                      revcomp(revtranscribe(c_seq)))
+        log.exception('Target sequence not found: {}'.format(
+                      revcomp(revtranscribe(c_seq))))
         raise
     c_pos_ent = entropy[c_start:c_start + len(c_seq)]
     c_mean_ent = sum(c_pos_ent) / len(c_pos_ent)
@@ -746,7 +748,7 @@ def parse_fasta(file_name):
             if not new_entry == 0:
                 raise Exception('Wrong input format')
         except Exception as e:
-            log.exception('Sequence not in FASTA fromat.')
+            log.exception('Sequence not in FASTA format.')
             raise
         yield entry
     return
@@ -802,13 +804,15 @@ def check_segid(database, input_id):
     try:
         feature = database[input_id]
     except gffutils.FeatureNotFoundError:
-        log.warning('Feature \'{}\' not found in the database.', input_id)
+        log.warning('Feature \'{}\' not found in the database.'.format(
+            input_id))
         return False
     else:
         if feature.featuretype == 'transcript':
             return True
         else:
-            log.warning('\'{}\' is not a valid Transcript ID.', input_id)
+            log.warning('\'{}\' is not a valid Transcript ID.'.format(
+                input_id))
             return False
 
 
@@ -906,8 +910,9 @@ def gene2csm(database,
             if not (gene.strand == '+' or gene.strand == '-'):
                 raise Exception('Wrong symbol')
         except Exception as e:
-            log.exception('Target gene has unspecified strand symbol: {}.',
-                          gene.strand)
+            log.exception('Target gene has unspecified strand symbol: \
+{}.'.format(
+                          gene.strand))
             raise
         g_name = gene['gene_name'][0]
         log.info(g_name)
@@ -941,14 +946,15 @@ def gene2csm(database,
                                  proc=n_threads)
         # do not store the empty results
         if output == -1:
-            log.warning('No valid segments for target {}:{}', target, g_name)
+            log.warning('No valid segments for target {}:{}'.format(target,
+                                                                    g_name))
             continue
 
         if file_prefix:
             fn = file_prefix + target + '.result.csv'
         else:
             fn = target + '.result.csv'
-        log.info('\nWriting file {}.', fn)
+        log.info('\nWriting file {}.'.format(fn))
         with open(fn, 'w') as handle:
             for item in output:
                 handle.write(','.join([str(e) for e in item]) + '\n')
@@ -958,31 +964,52 @@ def gene2csm(database,
     return result
 
 
+class SingleLevelFilter(logging.Filter):
+    '''
+    Logging filter to single out specific log levels.
+    '''
+
+    def __init__(self, passlevel, reject):
+        self.passlevel = passlevel
+        self.reject = reject
+
+    def filter(self, record):
+        if self.reject:
+            return (record.levelno != self.passlevel)
+        else:
+            return (record.levelno == self.passlevel)
+
+
 # set logging
 
 # create logger with the module name
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+# do not set the logging level - let it be set by the parent module
+# log.setLevel(logging.DEBUG)
+# set propagate to False, so the message wont be propagated to the ancestor
+# loggers if they get initiated
+log.propagate = False
 # create console handler for all but info levels
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+# ch.setLevel(logging.DEBUG)
+# create filter for rejection of info level
+f = SingleLevelFilter(logging.INFO, True)
+ch.addFilter(f)
+# create formatters for this handler
+basic_formatter = logging.Formatter(
+    fmt='{asctime}:{name}:{levelname}: {message}', style='{')
+# add it to the handler
+ch.setFormatter(basic_formatter)
 # now for info
 chi = logging.StreamHandler()
-chi.setLevel(logging.INFO)
-# now for DEBUG
-chd = logging.StreamHandler()
-chd.setLevel(logging.DEBUG)
-# create formatters and add them to the handlers
-basic_formatter = logging.Formatter(
-    fmt='%(asctime)s:%(name)s:%(levelname)s: %(message)s', style='{')
-info_formatter = logging.Formatter(fmt='%(message)s', datefmt=None, style='{')
-ch.setFormatter(basic_formatter)
+# chi.setLevel(logging.INFO)
+fi = SingleLevelFilter(logging.INFO, False)
+chi.addFilter(fi)
+info_formatter = logging.Formatter(fmt='{message}', datefmt=None, style='{')
 chi.setFormatter(info_formatter)
-chd.setFormatter(basic_formatter)
 # add the handlers to the logger
 log.addHandler(ch)
 log.addHandler(chi)
-log.addHandler(chd)
 
 
 # TODO:
