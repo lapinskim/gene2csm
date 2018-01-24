@@ -1,6 +1,7 @@
 # Imports
 import gffutils
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
@@ -964,53 +965,59 @@ def gene2csm(database,
     return result
 
 
-class SingleLevelFilter(logging.Filter):
+def conf_logger(logger):
     '''
-    Logging filter to single out specific log levels.
+    Configure logger
     '''
 
-    def __init__(self, passlevel, reject):
-        self.passlevel = passlevel
-        self.reject = reject
+    class SingleLevelFilter(logging.Filter):
+        '''
+        Logging filter to single out specific log levels.
+        '''
 
-    def filter(self, record):
-        if self.reject:
-            return (record.levelno != self.passlevel)
-        else:
-            return (record.levelno == self.passlevel)
+        def __init__(self, passlevel, reject):
+            self.passlevel = passlevel
+            self.reject = reject
+
+        def filter(self, record):
+            if self.reject:
+                return (record.levelno != self.passlevel)
+            else:
+                return (record.levelno == self.passlevel)
+
+    # do not set the logging level - let it be set by the parent module
+    # log.setLevel(logging.DEBUG)
+    # set propagate to False, so the message wont be propagated to the ancestor
+    # loggers if they get initiated
+    logger.propagate = False
+    # create console handler for all but info levels
+    ch = logging.StreamHandler(sys.stdout)
+    # ch.setLevel(logging.DEBUG)
+    # create filter for rejection of info level
+    f = SingleLevelFilter(logging.INFO, True)
+    ch.addFilter(f)
+    # create formatters for this handler
+    basic_formatter = logging.Formatter(
+        fmt='{asctime}:{name}:{levelname}: {message}',
+        style='{')
+    # add it to the handler
+    ch.setFormatter(basic_formatter)
+    # now for info
+    chi = logging.StreamHandler(sys.stdout)
+    # chi.setLevel(logging.INFO)
+    fi = SingleLevelFilter(logging.INFO, False)
+    chi.addFilter(fi)
+    info_formatter = logging.Formatter(fmt='{message}',
+                                       datefmt=None,
+                                       style='{')
+    chi.setFormatter(info_formatter)
+    # add the handlers to the logger
+    logger.addHandler(ch)
+    logger.addHandler(chi)
+    return logger
 
 
-# set logging
-
-# create logger with the module name
-log = logging.getLogger(__name__)
-# do not set the logging level - let it be set by the parent module
-# log.setLevel(logging.DEBUG)
-# set propagate to False, so the message wont be propagated to the ancestor
-# loggers if they get initiated
-log.propagate = False
-# create console handler for all but info levels
-ch = logging.StreamHandler()
-# ch.setLevel(logging.DEBUG)
-# create filter for rejection of info level
-f = SingleLevelFilter(logging.INFO, True)
-ch.addFilter(f)
-# create formatters for this handler
-basic_formatter = logging.Formatter(
-    fmt='{asctime}:{name}:{levelname}: {message}', style='{')
-# add it to the handler
-ch.setFormatter(basic_formatter)
-# now for info
-chi = logging.StreamHandler()
-# chi.setLevel(logging.INFO)
-fi = SingleLevelFilter(logging.INFO, False)
-chi.addFilter(fi)
-info_formatter = logging.Formatter(fmt='{message}', datefmt=None, style='{')
-chi.setFormatter(info_formatter)
-# add the handlers to the logger
-log.addHandler(ch)
-log.addHandler(chi)
-
+log = conf_logger(logging.getLogger(__name__))
 
 # TODO:
 # Better handling of finding sequences within the folded transcript
