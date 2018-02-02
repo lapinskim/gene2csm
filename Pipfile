@@ -17,6 +17,11 @@ pysam = "*"
 openpyxl = "*"
 numpy = "*"
 seaborn = "*"
+flask = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-bootstrap = "*"
+flask-wtf = "*"
 
 
 [dev-packages]
