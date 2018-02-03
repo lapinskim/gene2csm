@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Request
 from config import Config
 import logging
 from logging.handlers import RotatingFileHandler
