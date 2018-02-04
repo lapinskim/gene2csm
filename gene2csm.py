@@ -3,7 +3,7 @@ import gffutils
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import subprocess
 import re
 import logging
@@ -11,6 +11,7 @@ from multiprocessing import Pool
 from collections import Counter
 from decimal import Decimal
 from pybedtools import BedTool
+from Bio import SeqIO
 
 # Define functions
 
@@ -662,7 +663,8 @@ def processing_fun(input_list):
 
 
 def estimate_energy(database,
-                    fasta_index,
+                    fasta_fn,
+                    fasta_indexfn,
                     gene,
                     intervals,
                     coverage,
@@ -674,6 +676,10 @@ def estimate_energy(database,
     '''
     Estimate free energy change for a single transcript
     '''
+
+    fasta_index = SeqIO.index_db(fasta_indexfn,
+                                 fasta_fn,
+                                 'fasta')
 
     pool = Pool(proc)
     strand = gene.strand
@@ -821,8 +827,9 @@ def estimate_energy_input(input_sequence,
                           length,
                           GC_lims,
                           strand='+',
-                          database=None,
-                          fasta_index=None,
+                          database_fn=None,
+                          fasta_fn=None,
+                          fasta_indexfn=None,
                           proc=1,
                           verbose=True):
     '''
@@ -836,6 +843,10 @@ def estimate_energy_input(input_sequence,
                             lookup is required
     '''
 
+    database = None
+    if database_fn and os.path.exists(database_fn):
+        database = gffutils.FeatureDB(database_fn)
+
     pool = Pool(proc)
     input_id, input_seq = processing_input(input_sequence)
     # assume that for the input the strand is always the Watson one
@@ -845,6 +856,11 @@ def estimate_energy_input(input_sequence,
     # check if the input ID is in the database and if it is a valid
     # transcript ID, if yes use it to create negative segid list
     # for BLAST and fold this particular transcript for energy estimations
+
+    if fasta_fn and fasta_indexfn:
+        fasta_index = SeqIO.index_db(fasta_indexfn,
+                                     fasta_fn,
+                                     'fasta')
     if database and fasta_index and check_segid(database, input_id):
         ngsi_tmp = create_negseqidlst(database, transcript_id=input_id)
         transcript_id, transcript_seq = pick_transcript(database,
@@ -887,8 +903,9 @@ def estimate_energy_input(input_sequence,
     return input_id, result_list
 
 
-def gene2csm(database,
-             fasta_index,
+def gene2csm(database_fn,
+             fasta_fn,
+             fasta_indexfn,
              var_db,
              target_lst,
              crRNA_lenght,
@@ -901,6 +918,17 @@ def gene2csm(database,
     '''
     Main function to run the program.
     '''
+
+    if not os.path.exists(database_fn):
+        database = gffutils.create_db("Danio_rerio.GRCz10.90.gtf",
+                                      dbfn="danRer.GRCz10.90.db",
+                                      id_spec={'gene': 'gene_id',
+                                               'transcript': "transcript_id"},
+                                      disable_infer_genes=True,
+                                      disable_infer_transcripts=True,
+                                      force=False)
+    else:
+        database = gffutils.FeatureDB(database_fn)
 
     result = []
     for target in target_lst:
@@ -926,19 +954,20 @@ def gene2csm(database,
         cov_lims = coverage_limit
         if coverage_limit == 'max':
             cov_lims = gene_cov.max()
-        if gene.strand == '+':
-            plot_cov = gene_cov
-        else:
-            plot_cov = gene_cov[::-1]
+        # if gene.strand == '+':
+        #     plot_cov = gene_cov
+        # else:
+        #     plot_cov = gene_cov[::-1]
         # plotting
-        plt.plot(plot_cov, 'blue')
-        plt.show()
+        # plt.plot(plot_cov, 'blue')
+        # plt.show()
         gen_int = sub_var(sub_usr(get_int(gene, gene_cov),
                                   gene.strand,
                                   e_list),
                           var_db)
         output = estimate_energy(database,
-                                 fasta_index,
+                                 fasta_fn,
+                                 fasta_indexfn,
                                  gene,
                                  gen_int,
                                  cov_lims,

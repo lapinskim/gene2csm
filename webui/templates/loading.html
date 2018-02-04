@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block scripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    var refresh_id = setInterval(function() {
+        $.get(
+          "{{ url_for('thread_status') }}",
+          function(data) {
+            console.log(data);
+            if (data.status == 'finished') {
+              window.location.replace("{{ url_for('result') }}");
+            }
+          }
+        )}
+      , 1000);
+  });
+</script>
+{{super()}}
+{% endblock %}}
+
+{% block page_content %}
+<div class="well">
+  <p style="text-align:center;"><img src="/static/ajax-loader.gif"</p>
+</div>
+{% endblock %}

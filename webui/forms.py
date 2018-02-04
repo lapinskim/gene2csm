@@ -57,6 +57,6 @@ class InputForm(FlaskForm):
     sequence = TextAreaField(u'Input sequence', validators=[Optional(),
                                                             Length(min=0,
                                                                    max=5000)])
-    excludedid = StringField(u'ID qnd exon number to exclude',
+    excludedid = StringField(u'ID and exon number to exclude',
                              validators=[Optional()])
     submit = SubmitField('Submit')
