@@ -240,7 +240,9 @@ def get_seq(fasta_index, intervals, coverage, length):
 def gen_seq(coord, sequence, length, strand, GC_lims, index=0):
     '''
     Generate N long nucleotide stretches of CDS,
-    not containing any RepeatMasker marked low complexity regions
+    not containing any RepeatMasker marked low complexity regions.
+
+    Apply custom filters.
     '''
 
     while index <= len(sequence) - length:
