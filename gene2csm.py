@@ -349,7 +349,7 @@ def count_seq(segments, length, GC_lims, filters=None):
                 good += 1
             else:
                 sm_droped += 1
-    total = GC_high + GC_low + sm_droped + good
+    total = GC_high + GC_low + sm_droped + filtered + good
     log.info('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, \
 filtered = {}, sm = {})'.format(good,
                                 total,
