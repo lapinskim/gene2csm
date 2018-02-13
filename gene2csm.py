@@ -343,14 +343,14 @@ def count_seq(segments, length, GC_lims, filters=None):
             if gc_content > GC_lims[1]:
                 GC_high += 1
                 continue
-            f = False
+            flt = False
             if filters:
                 for f in filters:
                     if f.filter(seq):
                         filtered += 1
-                        f = True
+                        flt = True
                         break
-            if f:
+            if flt:
                 continue
             # count sequences with soft masked nucleotides
             if seq.isupper():
@@ -438,17 +438,18 @@ def run_RNAfold(transcript_id, transcript_seq):
 
     tmp_dir = get_tmpfs()
 
-    proc1 = subprocess.run(['RNAfold'] + params,
-                           stdout=subprocess.DEVNULL,
-                           stderr=subprocess.PIPE,
-                           input=in_str,
-                           encoding='ascii',
-                           cwd=tmp_dir)
-    if proc1.returncode != 0:
-        log.error('Subprocess exception: ' + proc1.stderr)
-        proc1.check_returncode()
-
     out_fn = os.path.join(tmp_dir, transcript_id + '_dp.ps')
+    if not os.path.exists(out_fn):
+        proc1 = subprocess.run(['RNAfold'] + params,
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.PIPE,
+                               input=in_str,
+                               encoding='ascii',
+                               cwd=tmp_dir)
+        if proc1.returncode != 0:
+            log.error('Subprocess exception: ' + proc1.stderr)
+            proc1.check_returncode()
+
     try:
         if not os.path.exists(out_fn):
             raise Exception('File does not exist.')
@@ -895,7 +896,8 @@ def estimate_energy_input(input_sequence,
                           fasta_index=None,
                           filters=None,
                           proc=1,
-                          verbose=True):
+                          verbose=True,
+                          cleanup=True):
     '''
     Estimate free energy change for a single input sequence.
 
@@ -954,12 +956,13 @@ def estimate_energy_input(input_sequence,
             print('\r', end='')
         result_list.append(result)
 
-    # clean up
-    # blast negative seqid list file
-    if ngsi_tmp:
-        os.remove(ngsi_tmp)
-    # RNAfold dot plot PS file
-    os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
+    if cleanup:
+        # clean up
+        # blast negative seqid list file
+        if ngsi_tmp:
+            os.remove(ngsi_tmp)
+        # RNAfold dot plot PS file
+        os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
     return input_id, result_list
 
 
