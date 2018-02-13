@@ -316,13 +316,14 @@ def gen_seq(coord, sequence, length, strand, GC_lims, filters=None, index=0):
     return
 
 
-def count_seq(segments, length, GC_lims):
+def count_seq(segments, length, GC_lims, filters=None):
     '''
     Count the number of sequences for processing
     '''
 
     GC_high = 0
     GC_low = 0
+    filtered = 0
     sm_droped = 0
     good = 0
     for coord, sequence in segments:
@@ -338,6 +339,11 @@ def count_seq(segments, length, GC_lims):
             if gc_content > GC_lims[1]:
                 GC_high += 1
                 continue
+            if filters:
+                for f in filters:
+                    if f.filter(seq):
+                        filtered += 1
+                        continue
             # count sequences with soft masked nucleotides
             if seq.isupper():
                 good += 1
@@ -345,12 +351,12 @@ def count_seq(segments, length, GC_lims):
                 sm_droped += 1
     total = GC_high + GC_low + sm_droped + good
     log.info('Valid sequences: {} / {} (GC_low = {}, GC_high = {}, \
-sm = {})'.format(
-             good,
-             total,
-             GC_low,
-             GC_high,
-             sm_droped))
+filtered = {}, sm = {})'.format(good,
+                                total,
+                                GC_low,
+                                GC_high,
+                                filtered,
+                                sm_droped))
     return good
 
 
@@ -736,7 +742,7 @@ def estimate_energy(database,
     # do not run if there are no segments to process
     if len(segments) == 0:
         return -1
-    total = count_seq(segments, length, GC_lims)
+    total = count_seq(segments, length, GC_lims, filters)
     ngsi_tmp = create_negseqidlst(database, gene_id=gene.id)
     result_list = []
     transcript_id, transcript_seq = pick_transcript(database,
@@ -897,7 +903,7 @@ def estimate_energy_input(input_sequence,
     input_id, input_seq = processing_input(input_sequence)
     # assume that for the input the strand is always the Watson one
     segment = [[['.', 0, len(input_seq)], input_seq]]
-    total = count_seq(segment, length, GC_lims)
+    total = count_seq(segment, length, GC_lims, filters)
     ngsi_tmp = None
     # check if the input ID is in the database and if it is a valid
     # transcript ID, if yes use it to create negative segid list
