@@ -926,8 +926,12 @@ def estimate_energy_input(input_sequence,
         transcript_id, transcript_seq = input_id, input_seq
 
     result_list = []
-    # get the positional entropy for the whole sequence/transcript
-    entropy = run_RNAfold(transcript_id, transcript_seq)
+    if total != 0:
+        # get the positional entropy for the whole sequence/transcript
+        entropy = run_RNAfold(transcript_id, transcript_seq)
+    else:
+        log.info('No valid sequences could be generated.')
+        return input_id, None
 
     iterator = feed_fun(segment,
                         length,
