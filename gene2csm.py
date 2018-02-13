@@ -254,16 +254,17 @@ class SequenceFilter(object):
         middle = ''
         ending = ''
         if start:
-            beginning = r'^{}'.format(start)
+            beginning = r'^{}'.format(start.upper())
         if mid:
             if exclusive:
-                middle = (r'(?!{})'.format(r'|'.join([r'.*' + e + r'.+' for e
-                                                      in mid])))
+                middle = (r'(?!{})'.format(r'|'.join(
+                    [r'.*' + e.upper() + r'.+' for e in mid])))
             else:
                 for pattern in mid:
-                    middle = r''.join([r'(?=.*{}.+)'.format(e) for e in mid])
+                    middle = r''.join(
+                        [r'(?=.*{}.+)'.format(e.upper()) for e in mid])
         if end:
-            ending = r'.*{}$'.format(end)
+            ending = r'.*{}$'.format(end.upper())
 
         self.pattern = re.compile(beginning + middle + ending)
         self.exclusive = exclusive
@@ -271,12 +272,12 @@ class SequenceFilter(object):
 
     def filter(self, sequence):
         if self.reject:
-            if self.pattern.search(sequence):
+            if self.pattern.search(sequence.upper()):
                 return True
             else:
                 return False
         else:
-            if self.pattern.search(sequence):
+            if self.pattern.search(sequence.upper()):
                 return False
             else:
                 return True
