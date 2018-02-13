@@ -306,10 +306,14 @@ def gen_seq(coord, sequence, length, strand, GC_lims, filters=None, index=0):
         if gc_content < GC_lims[0] or gc_content > GC_lims[1]:
             continue
         # Apply the filters
+        filtered = False
         if filters:
             for f in filters:
                 if f.filter(rna_seq):
-                    continue
+                    filtered = True
+                    break
+        if filtered:
+            continue
         # do not generate sequences with soft masked nucleotides
         if rna_seq.isupper():
             yield [s_coords, rna_seq, gc_content]
@@ -339,11 +343,15 @@ def count_seq(segments, length, GC_lims, filters=None):
             if gc_content > GC_lims[1]:
                 GC_high += 1
                 continue
+            f = False
             if filters:
                 for f in filters:
                     if f.filter(seq):
                         filtered += 1
-                        continue
+                        f = True
+                        break
+            if f:
+                continue
             # count sequences with soft masked nucleotides
             if seq.isupper():
                 good += 1
