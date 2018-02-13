@@ -237,7 +237,52 @@ def get_seq(fasta_index, intervals, coverage, length):
     return seg_lst
 
 
-def gen_seq(coord, sequence, length, strand, GC_lims, index=0):
+class SequenceFilter(object):
+    '''
+    Filter sequence based on selected patterns
+
+    Specify middle string or starting and ending sequence for filtering.
+
+    TODO: re.search with '^' VS match
+    '''
+
+    def __init__(self, mid=None, start=None, end=None,
+                 exclusive=True,
+                 reject=True):
+
+        beginning = r'^'
+        middle = ''
+        ending = ''
+        if start:
+            beginning = r'^{}'.format(start)
+        if mid:
+            if exclusive:
+                middle = (r'(?!{})'.format(r'|'.join([r'.*' + e + r'.+' for e
+                                                      in mid])))
+            else:
+                for pattern in mid:
+                    middle = r''.join([r'(?=.*{}.+)'.format(e) for e in mid])
+        if end:
+            ending = r'.*{}$'.format(end)
+
+        self.pattern = re.compile(beginning + middle + ending)
+        self.exclusive = exclusive
+        self.reject = reject
+
+    def filter(self, sequence):
+        if self.reject:
+            if self.pattern.search(sequence):
+                return True
+            else:
+                return False
+        else:
+            if self.pattern.search(sequence):
+                return False
+            else:
+                return True
+
+
+def gen_seq(coord, sequence, length, strand, GC_lims, filters=None, index=0):
     '''
     Generate N long nucleotide stretches of CDS,
     not containing any RepeatMasker marked low complexity regions.
@@ -259,6 +304,11 @@ def gen_seq(coord, sequence, length, strand, GC_lims, index=0):
         gc_content = round(gc(rna_seq), 2)
         if gc_content < GC_lims[0] or gc_content > GC_lims[1]:
             continue
+        # Apply the filters
+        if filters:
+            for f in filters:
+                if f.filter(rna_seq):
+                    continue
         # do not generate sequences with soft masked nucleotides
         if rna_seq.isupper():
             yield [s_coords, rna_seq, gc_content]
@@ -622,6 +672,7 @@ def feed_fun(segments,
              GC_lims,
              transcript_seq,
              entropy,
+             filters=None,
              tmp_path=None):
     '''
     Returns an iterator for multiprocessing function.
@@ -629,7 +680,7 @@ def feed_fun(segments,
 
     for coordinates, sequence in segments:
         for result in gen_seq(coordinates, sequence, length,
-                              strand, GC_lims, index=0):
+                              strand, GC_lims, filters=None, index=0):
             yield result + [transcript_seq] + [tmp_path] + [entropy]
     return
 
@@ -671,6 +722,7 @@ def estimate_energy(database,
                     length,
                     GC_lims,
                     ensembl_id=None,
+                    filters=None,
                     proc=1,
                     verbose=True):
     '''
@@ -699,6 +751,7 @@ def estimate_energy(database,
                         GC_lims,
                         transcript_seq,
                         entropy,
+                        filters,
                         ngsi_tmp)
 
     done = 0
@@ -825,6 +878,7 @@ def estimate_energy_input(input_sequence,
                           strand='+',
                           database=None,
                           fasta_index=None,
+                          filters=None,
                           proc=1,
                           verbose=True):
     '''
@@ -866,6 +920,7 @@ def estimate_energy_input(input_sequence,
                         GC_lims,
                         transcript_seq,
                         entropy,
+                        filters,
                         ngsi_tmp)
 
     done = 0
@@ -896,6 +951,7 @@ def gene2csm(database,
              crRNA_lenght,
              GC_limit,
              n_threads,
+             filters=None,
              coverage_limit='max',
              exclude_dict=None,
              file_prefix=None,
@@ -946,6 +1002,7 @@ def gene2csm(database,
                                  cov_lims,
                                  crRNA_lenght,
                                  GC_limit,
+                                 filters,
                                  proc=n_threads)
         # do not store the empty results
         if output == -1:
