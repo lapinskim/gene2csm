@@ -1006,6 +1006,7 @@ def gene2csm(database,
              n_threads=1,
              filters=None,
              coverage_limit='max',
+             use_variation=True,
              exclude_dict=None,
              file_prefix=None,
              verbose=True,
@@ -1045,10 +1046,15 @@ def gene2csm(database,
         # plotting
         plt.plot(plot_cov, 'blue')
         plt.show()
-        gen_int = sub_var(sub_usr(get_int(gene, gene_cov),
-                                  gene.strand,
-                                  e_list),
-                          var_db)
+        if use_variation:
+            gen_int = sub_var(sub_usr(get_int(gene, gene_cov),
+                                      gene.strand,
+                                      e_list),
+                              var_db)
+        else:
+            gen_int = sub_usr(get_int(gene, gene_cov),
+                              gene.strand,
+                              e_list)
         output = estimate_energy(database,
                                  fasta_index,
                                  gene,
