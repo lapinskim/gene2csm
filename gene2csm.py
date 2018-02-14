@@ -758,7 +758,7 @@ def estimate_energy(database,
     segments = get_seq(fasta_index, intervals, coverage, length)
     # do not run if there are no segments to process
     if len(segments) == 0:
-        return -1
+        return None
     total = count_seq(segments, length, strand, GC_lims, filters)
     ngsi_tmp = create_negseqidlst(database, gene_id=gene.id)
     result_list = []
@@ -1068,7 +1068,7 @@ def gene2csm(database,
                                  verbose=verbose,
                                  cleanup=cleanup)
         # do not store the empty results
-        if output == -1:
+        if not output:
             log.warning('No valid segments for target {}:{}'.format(target,
                                                                     g_name))
             continue
