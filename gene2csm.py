@@ -320,7 +320,7 @@ def gen_seq(coord, sequence, length, strand, GC_lims, filters=None, index=0):
     return
 
 
-def count_seq(segments, length, GC_lims, filters=None):
+def count_seq(segments, length, strand, GC_lims, filters=None):
     '''
     Count the number of sequences for processing
     '''
@@ -334,9 +334,13 @@ def count_seq(segments, length, GC_lims, filters=None):
         index = 0
         while index <= len(sequence) - length:
             seq = sequence[index:index + length]
+            if strand == '+':
+                rna_seq = transcribe(revcomp(seq))
+            else:
+                rna_seq = transcribe(seq)
             index += 1
             # count the sequence when outside of the GC content limits
-            gc_content = round(gc(seq), 2)
+            gc_content = round(gc(rna_seq), 2)
             if gc_content < GC_lims[0]:
                 GC_low += 1
                 continue
@@ -346,14 +350,14 @@ def count_seq(segments, length, GC_lims, filters=None):
             flt = False
             if filters:
                 for f in filters:
-                    if f.filter(seq):
-                        filtered += 1
+                    if f.filter(rna_seq):
                         flt = True
                         break
             if flt:
+                filtered += 1
                 continue
             # count sequences with soft masked nucleotides
-            if seq.isupper():
+            if rna_seq.isupper():
                 good += 1
             else:
                 sm_droped += 1
@@ -696,7 +700,7 @@ def feed_fun(segments,
 
     for coordinates, sequence in segments:
         for result in gen_seq(coordinates, sequence, length,
-                              strand, GC_lims, filters=None, index=0):
+                              strand, GC_lims, filters, index=0):
             yield result + [transcript_seq] + [tmp_path] + [entropy]
     return
 
@@ -740,7 +744,8 @@ def estimate_energy(database,
                     ensembl_id=None,
                     filters=None,
                     proc=1,
-                    verbose=True):
+                    verbose=True,
+                    cleanup=True):
     '''
     Estimate free energy change for a single transcript
     '''
@@ -782,11 +787,12 @@ def estimate_energy(database,
             print('\r', end='')
         result_list.append(result)
 
-    # clean up
-    # blast negative seqid list file
-    os.remove(ngsi_tmp)
-    # RNAfold dot plot PS file
-    os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
+    if cleanup:
+        # clean up
+        # blast negative seqid list file
+        os.remove(ngsi_tmp)
+        # RNAfold dot plot PS file
+        os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
     return result_list
 
 
@@ -913,7 +919,7 @@ def estimate_energy_input(input_sequence,
     input_id, input_seq = processing_input(input_sequence)
     # assume that for the input the strand is always the Watson one
     segment = [[['.', 0, len(input_seq)], input_seq]]
-    total = count_seq(segment, length, GC_lims, filters)
+    total = count_seq(segment, length, strand, GC_lims, filters)
     ngsi_tmp = None
     # check if the input ID is in the database and if it is a valid
     # transcript ID, if yes use it to create negative segid list
@@ -977,7 +983,8 @@ def gene2csm(database,
              coverage_limit='max',
              exclude_dict=None,
              file_prefix=None,
-             verbose=True):
+             verbose=True,
+             cleanup=True):
     '''
     Main function to run the program.
     '''
@@ -1025,7 +1032,9 @@ def gene2csm(database,
                                  crRNA_lenght,
                                  GC_limit,
                                  filters,
-                                 proc=n_threads)
+                                 proc=n_threads,
+                                 verbose=verbose,
+                                 cleanup=cleanup)
         # do not store the empty results
         if output == -1:
             log.warning('No valid segments for target {}:{}'.format(target,
