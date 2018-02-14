@@ -637,15 +637,13 @@ def create_negseqidlst(database, gene_id=None, transcript_id=None):
     return tmp_file
 
 
-def blast_it(sequence, tmp_file=None):
+def blast_it(sequence, db, tmp_file=None):
     '''
     Run blastn on a sequence (wordsize 7).
     Return Bitscore, nident
 
     *Might* be faster to run on all sequences beforehand.
     '''
-
-    # TODO: take out the blastdb parameter
 
     try:
         if not isinstance(sequence, str):
@@ -656,7 +654,7 @@ def blast_it(sequence, tmp_file=None):
 
     params = ['-task', 'blastn',
               '-word_size', '7',
-              '-db', './blastdb/danRer_e91_allrna',
+              '-db', db,
               '-outfmt', '6 bitscore nident',
               '-num_threads', '1',
               '-max_target_seqs', '1']
@@ -693,6 +691,7 @@ def feed_fun(segments,
              transcript_seq,
              entropy,
              filters=None,
+             blastdb=None,
              tmp_path=None):
     '''
     Returns an iterator for multiprocessing function.
@@ -701,7 +700,8 @@ def feed_fun(segments,
     for coordinates, sequence in segments:
         for result in gen_seq(coordinates, sequence, length,
                               strand, GC_lims, filters, index=0):
-            yield result + [transcript_seq] + [tmp_path] + [entropy]
+            yield result + [transcript_seq] + [tmp_path] + [entropy] +\
+                    [blastdb]
     return
 
 
@@ -710,7 +710,7 @@ def processing_fun(input_list):
     Processing function for multiprocessing pool.
     '''
 
-    coords, c_seq, gc_content, t_seq, ngsi_tmp, entropy = input_list
+    coords, c_seq, gc_content, t_seq, ngsi_tmp, entropy, blastdb = input_list
     # get the mean entropy of the target sequence
     # TODO: !!! This is far from perfect
     # t_seq.upper() required in case of working with user-input
@@ -729,8 +729,10 @@ def processing_fun(input_list):
     energy = run_RNAcofold(c_seq)
     dG_AA = energy['dG']
     G_A = energy['A']
-    # blast the sequence against the Danio rerio RNA database
-    bs, ni = blast_it(c_seq, ngsi_tmp)
+    # blast the sequence against the RNA database
+    bs, ni = 0, 0
+    if blastdb:
+        bs, ni = blast_it(c_seq, blastdb, ngsi_tmp)
     return coords, c_seq, gc_content, c_mean_ent, dG_AA, G_A, bs, ni
 
 
@@ -741,6 +743,7 @@ def estimate_energy(database,
                     coverage,
                     length,
                     GC_lims,
+                    blastdb=None,
                     ensembl_id=None,
                     filters=None,
                     proc=1,
@@ -756,15 +759,22 @@ def estimate_energy(database,
     # do not run if there are no segments to process
     if len(segments) == 0:
         return -1
-    total = count_seq(segments, length, GC_lims, filters)
+    total = count_seq(segments, length, strand, GC_lims, filters)
     ngsi_tmp = create_negseqidlst(database, gene_id=gene.id)
     result_list = []
     transcript_id, transcript_seq = pick_transcript(database,
                                                     fasta_index,
                                                     gene,
                                                     ensembl_id)
-    # get the positional entropy for the whole transcript
-    entropy = run_RNAfold(transcript_id, transcript_seq)
+    if total != 0:
+        # get the positional entropy for the whole sequence/transcript
+        entropy = run_RNAfold(transcript_id, transcript_seq)
+    else:
+        log.info('No valid sequences could be generated.')
+        return None
+
+    if not blastdb:
+        log.info('No BLAST database path specified')
 
     iterator = feed_fun(segments,
                         length,
@@ -773,6 +783,7 @@ def estimate_energy(database,
                         transcript_seq,
                         entropy,
                         filters,
+                        blastdb,
                         ngsi_tmp)
 
     done = 0
@@ -787,12 +798,16 @@ def estimate_energy(database,
             print('\r', end='')
         result_list.append(result)
 
+    psfile = os.path.join(get_tmpfs(), transcript_id + '_dp.ps')
     if cleanup:
         # clean up
         # blast negative seqid list file
         os.remove(ngsi_tmp)
         # RNAfold dot plot PS file
-        os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
+        os.remove(psfile)
+    else:
+        log.info('Leaving the intermediate files:\n\
+{}'.format('\n'.join(e for e in [ngsi_tmp, psfile] if e)))
     return result_list
 
 
@@ -900,6 +915,7 @@ def estimate_energy_input(input_sequence,
                           strand='+',
                           database=None,
                           fasta_index=None,
+                          blastdb=None,
                           filters=None,
                           proc=1,
                           verbose=True,
@@ -941,6 +957,9 @@ def estimate_energy_input(input_sequence,
         log.info('No valid sequences could be generated.')
         return input_id, None
 
+    if not blastdb:
+        log.info('No BLAST database path specified')
+
     iterator = feed_fun(segment,
                         length,
                         strand,
@@ -948,6 +967,7 @@ def estimate_energy_input(input_sequence,
                         transcript_seq,
                         entropy,
                         filters,
+                        blastdb,
                         ngsi_tmp)
 
     done = 0
@@ -962,13 +982,17 @@ def estimate_energy_input(input_sequence,
             print('\r', end='')
         result_list.append(result)
 
+    psfile = os.path.join(get_tmpfs(), transcript_id + '_dp.ps')
     if cleanup:
         # clean up
         # blast negative seqid list file
         if ngsi_tmp:
             os.remove(ngsi_tmp)
         # RNAfold dot plot PS file
-        os.remove(os.path.join(get_tmpfs(), transcript_id + '_dp.ps'))
+        os.remove(psfile)
+    else:
+        log.info('Leaving the intermediate files:\n\
+{}'.format('\n'.join(e for e in [ngsi_tmp, psfile] if e)))
     return input_id, result_list
 
 
@@ -978,7 +1002,8 @@ def gene2csm(database,
              target_lst,
              crRNA_lenght,
              GC_limit,
-             n_threads,
+             blastdb=None,
+             n_threads=1,
              filters=None,
              coverage_limit='max',
              exclude_dict=None,
@@ -1031,7 +1056,8 @@ def gene2csm(database,
                                  cov_lims,
                                  crRNA_lenght,
                                  GC_limit,
-                                 filters,
+                                 blastdb=blastdb,
+                                 filters=filters,
                                  proc=n_threads,
                                  verbose=verbose,
                                  cleanup=cleanup)
