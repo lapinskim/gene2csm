@@ -653,6 +653,7 @@ def blast_it(sequence, db, tmp_file=None):
         raise
 
     params = ['-task', 'blastn',
+              '-evalue', '1000',
               '-word_size', '7',
               '-db', db,
               '-outfmt', '6 bitscore nident',
