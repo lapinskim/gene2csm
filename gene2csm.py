@@ -372,12 +372,12 @@ filtered = {}, sm = {})'.format(good,
     return good
 
 
-def run_RNAcofold(seq):
+def run_RNAcofold(seq1, seq2):
     '''
     Run RNAcofold to estimate the duplex folding change in free energy
     '''
 
-    in_str = seq + '&' + seq
+    in_str = seq1 + '&' + seq2
     params = ['-a0',
               '-d2',
               '--noLP',
@@ -727,7 +727,7 @@ def processing_fun(input_list):
     c_pos_ent = entropy[c_start:c_start + len(c_seq)]
     c_mean_ent = sum(c_pos_ent) / len(c_pos_ent)
     # estimate also the change in free energy of monomer binding to itself
-    energy = run_RNAcofold(c_seq)
+    energy = run_RNAcofold(c_seq, c_seq)
     dG_AA = energy['dG']
     G_A = energy['A']
     # blast the sequence against the RNA database
