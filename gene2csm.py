@@ -380,7 +380,6 @@ def run_RNAcofold(seq1, seq2):
     in_str = seq1 + '&' + seq2
     params = ['-a0',
               '-d2',
-              '--noLP',
               '--noPS',
               '--output-format=D',
               '--csv-noheader']
